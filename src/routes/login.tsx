@@ -13,6 +13,18 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/login")({ component: Login });
 
 const GENERIC_AUTH_ERROR = "Não foi possível entrar. Confira os dados e tente de novo.";
+const PASSWORD_RULE = "A senha precisa de 8 caracteres, com maiúscula, minúscula, número e um símbolo.";
+
+function strongPassword(password: string) {
+  return (
+    password.length >= 8 &&
+    password.length <= 128 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /\d/.test(password) &&
+    /[^A-Za-z0-9]/.test(password)
+  );
+}
 const GOOGLE = GROK_PROVIDERS.find((p) => p.idp === "google");
 
 function GoogleMark() {
@@ -51,6 +63,10 @@ function Login() {
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail || password.length < 8 || password.length > 128) {
       setError(GENERIC_AUTH_ERROR);
+      return;
+    }
+    if (mode === "signup" && !strongPassword(password)) {
+      setError(PASSWORD_RULE);
       return;
     }
     setBusy(true);
@@ -107,7 +123,6 @@ function Login() {
                     autoComplete="email"
                     inputMode="email"
                     maxLength={254}
-                    placeholder="voce@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
@@ -124,9 +139,7 @@ function Login() {
                     type={showPassword ? "text" : "password"}
                     name="password"
                     autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                    minLength={8}
                     maxLength={128}
-                    placeholder="Mínimo de 8 caracteres"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="px-10"
