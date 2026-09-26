@@ -105,10 +105,10 @@ html[data-theme="dark"] {
   flex: 1;
   flex-direction: column;
   overflow: hidden;
-  padding-top: calc(max(env(safe-area-inset-top, 0px), 3rem) + 3.25rem);
-  padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
-  padding-bottom: 0.75rem;
-  padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+  padding-top: max(4.75rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  padding-bottom: 0.5rem;
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
   -webkit-overflow-scrolling: touch;
 }
 
@@ -139,6 +139,18 @@ html[data-theme="dark"] {
   padding: 0 0.6rem;
   -webkit-appearance: none;
   appearance: none;
+}
+
+.task-date::-webkit-datetime-edit,
+.task-date::-webkit-date-and-time-value {
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+}
+
+[data-task-id] {
+  min-width: 0;
+  max-width: 100%;
 }
 
 @keyframes dino-bob {

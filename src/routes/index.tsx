@@ -23,30 +23,7 @@ import { notifyDone, notifyDue } from "@/lib/notify";
 import { sendUserPush } from "@/lib/push";
 import { AccountMenu } from "@/components/account-menu";
 import { cn } from "@/lib/utils";
-
-function spanDays(startIso: string | null, endIso: string | null) {
-  const start = dayValue(startIso);
-  const end = dayValue(endIso) || start;
-  if (!start) return [] as string[];
-  const from = start <= end ? start : end;
-  const to = start <= end ? end : start;
-  const days: string[] = [];
-  const cursor = new Date(`${from}T12:00:00`);
-  const last = new Date(`${to}T12:00:00`);
-  while (cursor.getTime() <= last.getTime() && days.length < 400) {
-    days.push(isoDay(cursor));
-    cursor.setDate(cursor.getDate() + 1);
-  }
-  return days;
-}
-
-function formatRange(startIso: string | null, endIso: string | null) {
-  const start = formatDue(startIso);
-  const end = formatDue(endIso);
-  if (!start) return null;
-  if (!end || start === end) return start;
-  return `${start} – ${end}`;
-}
+import { calendarDay, formatRange, noonUtc, spanDays } from "@/lib/dates";
 
 const STOP_WORDS = new Set([
   "para", "com", "uma", "uns", "umas", "que", "das", "dos", "por", "nao", "ate", "dia", "dias",
@@ -121,36 +98,6 @@ function emojiForTask(text: string) {
 
 function isUnauthorized(err: unknown) {
   return err instanceof Error && err.message === "Unauthorized";
-}
-
-function isSameDay(iso: string | null, day = new Date()) {
-  if (!iso) return false;
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return false;
-  return (
-    date.getFullYear() === day.getFullYear() &&
-    date.getMonth() === day.getMonth() &&
-    date.getDate() === day.getDate()
-  );
-}
-
-function formatDue(iso: string | null) {
-  if (!iso) return null;
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "short",
-  });
-}
-
-function dayValue(iso: string | null) {
-  if (!iso) return "";
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${date.getFullYear()}-${month}-${day}`;
 }
 
 function isoDay(date: Date) {
@@ -479,7 +426,8 @@ function TaskBoard() {
   const renderTask = (task: TaskRow) => {
     const dueLabel = formatRange(task.dueAt, task.endsAt);
     const end = task.endsAt ?? task.dueAt;
-    const overdue = Boolean(end && !task.done && new Date(end).getTime() < Date.now() && !isSameDay(end));
+    const endDay = calendarDay(end);
+    const overdue = Boolean(endDay && !task.done && endDay < isoDay(new Date()));
     return (
       <li
         key={task.id}
@@ -582,7 +530,7 @@ function TaskBoard() {
               <input
                 type="date"
                 aria-label={`Começo de ${task.text}`}
-                value={dayValue(task.dueAt)}
+                value={calendarDay(task.dueAt)}
                 onChange={(event) => spanChange(task, "start", event.target.value)}
                 className="task-date"
               />
@@ -592,7 +540,7 @@ function TaskBoard() {
               <input
                 type="date"
                 aria-label={`Fim de ${task.text}`}
-                value={dayValue(task.endsAt ?? task.dueAt)}
+                value={calendarDay(task.endsAt ?? task.dueAt)}
                 onChange={(event) => spanChange(task, "end", event.target.value)}
                 className="task-date"
               />
@@ -604,8 +552,8 @@ function TaskBoard() {
   };
 
   const spanChange = (task: TaskRow, which: "start" | "end", day: string) => {
-    let start = dayValue(task.dueAt);
-    let end = dayValue(task.endsAt ?? task.dueAt);
+    let start = calendarDay(task.dueAt);
+    let end = calendarDay(task.endsAt ?? task.dueAt);
     if (which === "start") start = day;
     else end = day;
     if (start && end && end < start) {
@@ -614,8 +562,8 @@ function TaskBoard() {
     }
     if (!start && end) start = end;
     if (start && !end) end = start;
-    const startAt = start ? new Date(`${start}T12:00:00`).toISOString() : null;
-    const endAt = end ? new Date(`${end}T12:00:00`).toISOString() : null;
+    const startAt = start ? noonUtc(start) : null;
+    const endAt = end ? noonUtc(end) : null;
     const previous = tasksRef.current.find((item) => item.id === task.id);
     const next = tasksRef.current.map((item) => (item.id === task.id ? { ...item, dueAt: startAt, endsAt: endAt } : item));
     tasksRef.current = next;
