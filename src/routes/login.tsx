@@ -5,7 +5,10 @@ import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/clie
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
@@ -70,6 +73,7 @@ function Login() {
       window.location.href = "/";
     } catch {
       setError(GENERIC_AUTH_ERROR);
+      toast.error(GENERIC_AUTH_ERROR);
       setBusy(false);
     }
   };
@@ -92,46 +96,52 @@ function Login() {
         ) : (
           <>
             <form className="mt-8 flex flex-col gap-3" onSubmit={submit}>
-              <label className="login-field relative block" style={{ animationDelay: "180ms" }}>
-                <span className="sr-only">E-mail</span>
-                <Mail className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-subtle" />
-                <Input
-                  type="email"
-                  name="email"
-                  autoComplete="email"
-                  inputMode="email"
-                  maxLength={254}
-                  placeholder="E-mail"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </label>
-              <label className="login-field relative block" style={{ animationDelay: "240ms" }}>
-                <span className="sr-only">Senha</span>
-                <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-subtle" />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                  minLength={8}
-                  maxLength={128}
-                  placeholder="Senha"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="px-10"
-                  required
-                />
-                <button
-                  type="button"
-                  className="absolute top-1/2 right-2 grid size-8 -translate-y-1/2 place-items-center text-subtle hover:text-fg"
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                  onClick={() => setShowPassword((v) => !v)}
-                >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
-              </label>
+              <div className="login-field flex flex-col gap-1.5" style={{ animationDelay: "180ms" }}>
+                <Label htmlFor="email">E-mail</Label>
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-subtle" />
+                  <Input
+                    id="email"
+                    type="email"
+                    name="email"
+                    autoComplete="email"
+                    inputMode="email"
+                    maxLength={254}
+                    placeholder="voce@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="login-field flex flex-col gap-1.5" style={{ animationDelay: "240ms" }}>
+                <Label htmlFor="password">Senha</Label>
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-subtle" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                    minLength={8}
+                    maxLength={128}
+                    placeholder="Mínimo de 8 caracteres"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="px-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute top-1/2 right-2 grid size-8 -translate-y-1/2 place-items-center text-subtle hover:text-fg"
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    onClick={() => setShowPassword((v) => !v)}
+                  >
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
+              </div>
               {error ? <p className="text-xs text-danger">{error}</p> : null}
               <Button type="submit" disabled={busy} className="login-field login-submit mt-1 h-12 w-full" style={{ animationDelay: "300ms" }}>
                 {busy ? "Aguarde…" : mode === "signin" ? "Entrar" : "Criar conta"}
@@ -141,9 +151,9 @@ function Login() {
             {GOOGLE ? (
               <>
                 <div className="my-6 flex items-center gap-3">
-                  <span className="h-px flex-1 bg-border" />
+                  <Separator className="flex-1" />
                   <span className="text-xs text-subtle">ou continue com</span>
-                  <span className="h-px flex-1 bg-border" />
+                  <Separator className="flex-1" />
                 </div>
                 <button
                   type="button"

@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { CookieConsent } from "@/components/cookie-consent";
+import { Toaster } from "@/components/ui/toaster";
 import { getPrefs } from "@/lib/prefs";
 import { applyTheme, readStoredTheme } from "@/lib/theme";
 import appCss from "../styles.css?url";
@@ -66,6 +67,7 @@ function Root() {
           <Outlet />
         </AuthProvider>
         <CookieConsent />
+        <Toaster />
         <Scripts />
       </body>
     </html>

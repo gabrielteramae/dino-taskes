@@ -1,3 +1,4 @@
+import * as SwitchPrimitive from "@radix-ui/react-switch";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -9,25 +10,25 @@ type Props = {
 
 export function Switch({ checked, onCheckedChange, label, disabled = false }: Props) {
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
+    <SwitchPrimitive.Root
+      checked={checked}
+      onCheckedChange={onCheckedChange}
       disabled={disabled}
-      onClick={() => onCheckedChange(!checked)}
+      aria-label={label}
       className={cn(
-        "relative h-7 w-11 shrink-0 rounded-full transition-colors duration-300 ease-out disabled:opacity-50",
-        checked ? "bg-accent" : "bg-subtle/70",
+        "relative inline-flex h-7 w-11 shrink-0 items-center rounded-full transition-colors duration-300 ease-out",
+        "focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:outline-none",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        "data-[state=checked]:bg-accent data-[state=unchecked]:bg-subtle/70",
       )}
     >
-      <span
+      <SwitchPrimitive.Thumb
         className={cn(
-          "absolute top-0.5 left-0.5 size-6 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.35)]",
+          "pointer-events-none block size-6 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.35)]",
           "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-          checked ? "translate-x-4" : "translate-x-0",
+          "data-[state=unchecked]:translate-x-0.5 data-[state=checked]:translate-x-4",
         )}
       />
-    </button>
+    </SwitchPrimitive.Root>
   );
 }
