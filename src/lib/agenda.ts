@@ -76,3 +76,18 @@ export function phoneCalendarHref(task: AgendaTask) {
   if (endClock) params.set("endClock", endClock);
   return `/api/agenda?${params.toString()}`;
 }
+
+export async function downloadPhoneCalendar(task: AgendaTask) {
+  const href = phoneCalendarHref(task);
+  const ics = icsFor(task);
+  if (!href || !ics || typeof document === "undefined") return;
+  const file = new File([ics], "tarefa.ics", { type: "application/octet-stream" });
+  const url = URL.createObjectURL(file);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "tarefa.ics";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+}

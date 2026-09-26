@@ -29,7 +29,8 @@ export const Route = createFileRoute("/api/agenda")({
         return new Response(ics, {
           headers: {
             "content-type": "text/calendar; charset=utf-8",
-            "content-disposition": 'inline; filename="tarefa.ics"',
+            "content-disposition": 'attachment; filename="tarefa.ics"',
+            "x-content-type-options": "nosniff",
           },
         });
       },

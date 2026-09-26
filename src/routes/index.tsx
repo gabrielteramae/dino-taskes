@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Check, GripVertical, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DockNav, type DockTab } from "@/components/dock-nav";
@@ -24,7 +25,7 @@ import { sendUserPush } from "@/lib/push";
 import { AccountMenu } from "@/components/account-menu";
 import { cn } from "@/lib/utils";
 import { calendarDay, clockOf, formatRange, spanDays, withClock } from "@/lib/dates";
-import { googleAgendaUrl, phoneCalendarHref } from "@/lib/agenda";
+import { downloadPhoneCalendar, googleAgendaUrl, phoneCalendarHref } from "@/lib/agenda";
 
 const STOP_WORDS = new Set([
   "para", "com", "uma", "uns", "umas", "que", "das", "dos", "por", "nao", "ate", "dia", "dias",
@@ -577,6 +578,13 @@ function TaskBoard() {
                 </a>
                 <a
                   href={phoneCalendarHref(task) ?? "#"}
+                  download="tarefa.ics"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    void downloadPhoneCalendar(task).then(() => {
+                      toast("Arquivo salvo. Abra no app Calendário.");
+                    });
+                  }}
                   className="inline-flex h-11 items-center justify-center rounded-lg bg-surface-2 px-2 text-center text-xs text-fg"
                 >
                   Calendário
