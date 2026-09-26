@@ -31,12 +31,10 @@ precision mediump float;
 varying vec3 v_color;
 varying float v_alpha;
 void main() {
-  vec2 p = gl_PointCoord * 2.0 - 1.0;
-  float d = dot(p, p);
+  float d = length(gl_PointCoord * 2.0 - 1.0);
   if (d > 1.0) discard;
-  float body = smoothstep(1.0, 0.2, d);
-  float glow = exp(-d * 2.4);
-  gl_FragColor = vec4(v_color, v_alpha * (body * 0.72 + glow * 0.38));
+  float smoke = pow(smoothstep(1.0, 0.0, d), 1.7);
+  gl_FragColor = vec4(v_color, v_alpha * smoke);
 }`;
 
 const WASH_VERT = `
@@ -108,8 +106,9 @@ function FallingField() {
     const alpha = new Float32Array(count);
     const vx = new Float32Array(count);
     const vy = new Float32Array(count);
-    const mass = new Float32Array(count);
-    const drag = new Float32Array(count);
+    const age = new Float32Array(count);
+    const span = new Float32Array(count);
+    const base = new Float32Array(count);
 
     let width = 1;
     let height = 1;
@@ -118,16 +117,16 @@ function FallingField() {
 
     const reset = (i: number, anywhere: boolean) => {
       const tone = GREENS[i % GREENS.length] ?? GREENS[0];
-      const glow = i < 16;
-      const radius = glow ? 28 + (i % 5) * 6 : 3 + (i % 7) * 0.7;
+      const radius = 14 + (i % 9) * 3.2;
       pos[i * 2] = Math.random() * width;
-      pos[i * 2 + 1] = anywhere ? Math.random() * height : -radius;
-      vx[i] = (Math.random() - 0.5) * 18;
-      vy[i] = anywhere ? 40 + Math.random() * 80 : 0;
+      pos[i * 2 + 1] = anywhere ? Math.random() * height : height + radius;
+      vx[i] = (Math.random() - 0.5) * 16;
+      vy[i] = -(12 + Math.random() * 28);
+      base[i] = radius;
+      age[i] = anywhere ? Math.random() : 0;
+      span[i] = 4.2 + (i % 5) * 0.7;
       size[i] = Math.min(maxPoint, radius * 2 * ratio);
-      alpha[i] = glow ? 0.45 : 0.9;
-      mass[i] = radius * radius * radius * 0.02;
-      drag[i] = radius * radius * 0.0009;
+      alpha[i] = 0.28;
       color[i * 3] = tone[0];
       color[i * 3 + 1] = tone[1];
       color[i * 3 + 2] = tone[2];
@@ -167,7 +166,6 @@ function FallingField() {
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    const gravity = 980;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let last = performance.now();
     let frame = 0;
@@ -175,24 +173,24 @@ function FallingField() {
     const draw = (now: number) => {
       const dt = Math.min(0.033, (now - last) / 1000);
       last = now;
-      const wind = Math.sin(now * 0.0004) * 26 + Math.sin(now * 0.00017) * 12;
 
       if (!reduce && !document.hidden) {
         for (let i = 0; i < count; i += 1) {
-          const speed = Math.hypot(vx[i] ?? 0, vy[i] ?? 0);
-          const m = mass[i] || 1;
-          const c = drag[i] || 0;
-          vx[i] = (vx[i] ?? 0) + ((-c * speed * (vx[i] ?? 0)) / m + wind / m) * dt;
-          vy[i] = (vy[i] ?? 0) + (gravity + (-c * speed * (vy[i] ?? 0)) / m) * dt;
+          const t = age[i] ?? 0;
+          const sway = Math.sin((pos[i * 2] ?? 0) * 0.012 + now * 0.001 + i) * Math.cos((pos[i * 2 + 1] ?? 0) * 0.009);
+          const lift = -(42 + 70 * (1 - t));
+          const drag = 1.6 + t * 2.4;
+          vx[i] = (vx[i] ?? 0) + (sway * 90 - drag * (vx[i] ?? 0)) * dt;
+          vy[i] = (vy[i] ?? 0) + (lift - drag * (vy[i] ?? 0)) * dt;
           pos[i * 2] = (pos[i * 2] ?? 0) + (vx[i] ?? 0) * dt;
           pos[i * 2 + 1] = (pos[i * 2 + 1] ?? 0) + (vy[i] ?? 0) * dt;
-          if ((pos[i * 2] ?? 0) < -40) pos[i * 2] = width + 20;
-          if ((pos[i * 2] ?? 0) > width + 40) pos[i * 2] = -20;
+          age[i] = t + dt / (span[i] || 5);
+          const grown = (base[i] || 16) * (1 + (age[i] ?? 0) * 2.4);
+          size[i] = Math.min(maxPoint, grown * 2 * ratio);
+          const fade = Math.sin(Math.min(1, age[i] ?? 0) * Math.PI);
+          alpha[i] = fade * 0.34;
           const y = pos[i * 2 + 1] ?? 0;
-          if (y - (size[i] ?? 0) > height + 8) reset(i, false);
-          const enter = Math.min(1, (y + 30) / 90);
-          const exit = Math.max(0, 1 - Math.max(0, y - height * 0.58) / (height * 0.46));
-          alpha[i] = Math.max(0, Math.min(1, enter * exit)) * (i < 16 ? 0.55 : 0.92);
+          if ((age[i] ?? 0) >= 1 || y < -grown) reset(i, false);
         }
       }
 
