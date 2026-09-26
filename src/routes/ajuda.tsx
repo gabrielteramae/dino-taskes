@@ -14,7 +14,7 @@ const FAQS = [
   },
   {
     title: "Como reordeno?",
-    hint: "Na aba Tarefas, segura o ícone de linhas e arrasta a tarefa.",
+    hint: "Na lista, segura o ícone de linhas e arrasta a tarefa. O dia se escolhe em cada tarefa. O calendário só mostra.",
   },
   {
     title: "Os emojis?",

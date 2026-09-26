@@ -100,14 +100,10 @@ function isoDay(date: Date) {
 }
 
 function Agenda({
-  tasks,
   groups,
-  onDay,
   ready,
 }: {
-  tasks: TaskRow[];
   groups: { open: TaskRow[]; days: string[]; byDay: Map<string, TaskRow[]> };
-  onDay: (id: string, day: string) => void;
   ready: boolean;
 }) {
   const today = new Date();
@@ -127,11 +123,11 @@ function Agenda({
   ];
   const selectedTasks = [...(groups.byDay.get(selected) ?? [])];
 
-  if (ready && tasks.length === 0) {
+  if (ready && groups.days.length === 0 && groups.open.length === 0) {
     return (
       <div className="rounded-3xl bg-surface px-5 py-10 text-center shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
-        <p className="text-sm text-muted">Nenhuma tarefa ainda</p>
-        <p className="mt-1 text-xs text-subtle">Adiciona na aba Tarefas e escolhe o dia aqui.</p>
+        <p className="text-sm text-muted">Nada no calendário</p>
+        <p className="mt-1 text-xs text-subtle">Na lista, escolha o dia de uma tarefa. Ela aparece aqui.</p>
       </div>
     );
   }
@@ -183,45 +179,30 @@ function Agenda({
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm text-muted">Neste dia</h2>
+        <h2 className="mb-1 text-sm font-medium text-fg">
+          {new Date(`${selected}T12:00:00`).toLocaleDateString("pt-BR", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+          })}
+        </h2>
+        <p className="mb-3 text-xs text-subtle">O dia se escolhe na lista, não aqui.</p>
         {selectedTasks.length === 0 ? (
-          <p className="text-sm text-subtle">Nada marcado.</p>
+          <p className="text-sm text-subtle">Nada neste dia.</p>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-2">
             {selectedTasks.map((task) => (
-              <li key={task.id} className="rounded-2xl bg-surface px-4 py-3 shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
-                <p className="text-sm">{task.text}</p>
-                <input
-                  type="date"
-                  aria-label={`Dia de ${task.text}`}
-                  value={dayValue(task.dueAt)}
-                  onChange={(event) => onDay(task.id, event.target.value)}
-                  className="mt-3 h-11 w-full rounded-xl bg-surface-2 px-3 text-base text-fg"
-                />
+              <li key={task.id} className="rounded-2xl bg-surface px-4 py-3 text-sm shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
+                {task.text}
               </li>
             ))}
           </ul>
         )}
       </section>
-
       {groups.open.length > 0 ? (
-        <section>
-          <h2 className="mb-3 text-sm text-muted">Sem dia</h2>
-          <ul className="flex flex-col gap-3">
-            {groups.open.map((task) => (
-              <li key={task.id} className="rounded-2xl bg-surface px-4 py-3 shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
-                <p className="text-sm">{task.text}</p>
-                <input
-                  type="date"
-                  aria-label={`Dia de ${task.text}`}
-                  value={dayValue(task.dueAt)}
-                  onChange={(event) => onDay(task.id, event.target.value)}
-                  className="mt-3 h-11 w-full rounded-xl bg-surface-2 px-3 text-base text-fg"
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
+        <p className="text-xs text-subtle">
+          {groups.open.length} sem dia. Escolha o dia na lista para {groups.open.length === 1 ? "ela aparecer" : "elas aparecerem"} aqui.
+        </p>
       ) : null}
     </div>
   );
@@ -476,6 +457,20 @@ function TaskBoard() {
           </span>
           {dueLabel ? (
             <span className={cn("mt-0.5 block text-xs", overdue ? "text-danger" : "text-subtle")}>{dueLabel}</span>
+          ) : tab === "tarefas" ? (
+            <span className="mt-0.5 block text-xs text-subtle">Sem dia</span>
+          ) : null}
+          {tab === "tarefas" && !task.done ? (
+            <label className="mt-2 flex items-center gap-2 text-xs text-subtle">
+              Dia
+              <input
+                type="date"
+                aria-label={`Dia de ${task.text}`}
+                value={dayValue(task.dueAt)}
+                onChange={(event) => schedule(task.id, event.target.value)}
+                className="h-8 rounded-lg bg-surface-2 px-2 text-xs text-fg"
+              />
+            </label>
           ) : null}
         </span>
         <span
@@ -498,8 +493,8 @@ function TaskBoard() {
   };
 
   const titles: Record<DockTab, string> = {
-    tarefas: "Tarefas",
-    hoje: "Agenda",
+    tarefas: "Lista",
+    hoje: "Calendário",
     feitas: "Feitas",
   };
 
@@ -565,7 +560,14 @@ function TaskBoard() {
               </div>
             </div>
           ) : (
-            <h1 className="text-2xl font-semibold tracking-tight">{titles[tab]}</h1>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">{titles[tab]}</h1>
+              <p className="mt-1 text-xs text-subtle">
+                {tab === "hoje"
+                  ? "Só as tarefas que já têm um dia."
+                  : "As que você marcou como feitas."}
+              </p>
+            </div>
           )}
           <AccountMenu />
         </header>
@@ -595,14 +597,14 @@ function TaskBoard() {
         ) : null}
 
         {tab === "hoje" ? (
-          <Agenda tasks={tasks.filter((task) => !task.done)} groups={agendaGroups()} onDay={schedule} ready={ready} />
+          <Agenda groups={agendaGroups()} ready={ready} />
         ) : (
           <ul className="flex flex-col gap-3">
             {ready && visible.length === 0 ? (
               <li className="rounded-xl border border-border bg-surface px-5 py-10 text-center">
                 <p className="text-sm text-muted">Nada por aqui</p>
                 <p className="mt-1 text-xs text-subtle">
-                  {tab === "tarefas" ? "Escreve acima para começar." : "Troca de aba ou cria uma tarefa."}
+                  {tab === "tarefas" ? "Escreve acima. O dia, se quiser, fica em cada tarefa." : "Quando concluir uma da lista, ela vem para cá."}
                 </p>
               </li>
             ) : (
@@ -612,14 +614,7 @@ function TaskBoard() {
         )}
       </div>
 
-      <DockNav
-        tab={tab}
-        onChange={setTab}
-        onAdd={() => {
-          setTab("tarefas");
-          document.getElementById("nova-tarefa")?.focus();
-        }}
-      />
+      <DockNav tab={tab} onChange={setTab} />
     </main>
   );
 }
