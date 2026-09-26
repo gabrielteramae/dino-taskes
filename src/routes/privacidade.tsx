@@ -8,6 +8,7 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { listCookies, type CookieKind } from "@/lib/cookies";
 import { CONSENT_OFF, type Consent } from "@/lib/consent";
 import { clearStoredKind, listLocalStorage, type StorageKind } from "@/lib/storage";
+import { askForLocation, appUsesLocation, browserLocationState, stopUsingLocation, type LocationBrowser } from "@/lib/location";
 import { deleteAllTasks, exportMyData } from "@/lib/tasks";
 
 export const Route = createFileRoute("/privacidade")({ component: Privacidade });
@@ -17,6 +18,8 @@ function Privacidade() {
   const [busy, setBusy] = useState(false);
   const [cookies, setCookies] = useState<Array<{ name: string; kind: CookieKind }>>([]);
   const [stored, setStored] = useState<Array<{ key: string; kind: StorageKind }>>([]);
+  const [place, setPlace] = useState<LocationBrowser>("prompt");
+  const [placeOn, setPlaceOn] = useState(false);
   const consent = useConsentChoice();
   const { user } = useCurrentUserState();
   const current = consent ?? CONSENT_OFF;
@@ -24,6 +27,8 @@ function Privacidade() {
   useEffect(() => {
     setCookies(listCookies());
     setStored(listLocalStorage());
+    setPlaceOn(appUsesLocation());
+    void browserLocationState().then(setPlace);
   }, [consent]);
 
   const exportData = async () => {
@@ -125,6 +130,56 @@ function Privacidade() {
         </Button>
         <Button className="flex-1" onClick={() => commitConsent({ ...current, thirdParty: true })}>
           Permitir terceiros
+        </Button>
+      </div>
+
+      <p className="mt-6 mb-2 text-sm text-fg">Localização</p>
+      <ul className="overflow-hidden rounded-xl border border-border bg-surface">
+        <li className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+          <span>
+            <span className="block text-fg">Uso no app</span>
+            <span className="mt-0.5 block text-xs text-subtle">
+              {place === "unsupported"
+                ? "Este aparelho não informa o lugar."
+                : place === "denied"
+                  ? "O navegador bloqueou. O app não guarda o endereço."
+                  : placeOn && place === "granted"
+                    ? "Permitida. O app não guarda o endereço."
+                    : "Desligada. Nada é pedido até você tocar em pedir."}
+            </span>
+          </span>
+          <span className="shrink-0 text-xs text-subtle">
+            {place === "unsupported" ? "Indisponível" : placeOn && place === "granted" ? "Ligada" : "Desligada"}
+          </span>
+        </li>
+      </ul>
+      <div className="mt-3 flex gap-2">
+        <Button
+          variant="ghost"
+          className="flex-1 border border-border"
+          disabled={place === "unsupported" || busy}
+          onClick={() => {
+            stopUsingLocation();
+            setPlaceOn(false);
+            setStored(listLocalStorage());
+          }}
+        >
+          Desligar
+        </Button>
+        <Button
+          className="flex-1"
+          disabled={place === "unsupported" || busy}
+          onClick={() => {
+            setBusy(true);
+            void askForLocation().then(async (result) => {
+              setPlaceOn(result === "granted");
+              setPlace(await browserLocationState());
+              setStored(listLocalStorage());
+              setBusy(false);
+            });
+          }}
+        >
+          Pedir permissão
         </Button>
       </div>
 
