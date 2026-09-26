@@ -64,14 +64,19 @@ export function icsFor(task: AgendaTask) {
   ].join("\n");
 }
 
-export function saveOnPhoneCalendar(task: AgendaTask) {
+export async function saveOnPhoneCalendar(task: AgendaTask) {
   const ics = icsFor(task);
   if (!ics || typeof window === "undefined") return;
   const file = new File([ics], "tarefa.ics", { type: "text/calendar" });
+  if (navigator.share && navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: task.text });
+      return;
+    } catch {
+      return;
+    }
+  }
   const url = URL.createObjectURL(file);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "tarefa.ics";
-  link.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  window.location.assign(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 4000);
 }

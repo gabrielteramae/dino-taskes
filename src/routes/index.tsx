@@ -516,7 +516,7 @@ function TaskBoard() {
         <span
           className={cn(
             "size-2 shrink-0 rounded-full",
-            task.priority === "urgente" ? "bg-danger" : task.priority === "depois" ? "bg-accent" : "bg-[#e4b423]",
+            task.done ? "bg-accent" : task.priority === "urgente" ? "bg-danger" : task.priority === "depois" ? "bg-accent" : "bg-[#e4b423]",
           )}
           aria-hidden="true"
         />
@@ -580,7 +580,7 @@ function TaskBoard() {
                   onClick={() => saveOnPhoneCalendar(task)}
                   className="h-11 rounded-lg bg-surface-2 px-2 text-xs text-fg"
                 >
-                  No celular
+                  Calendário
                 </button>
               </div>
             ) : null}
