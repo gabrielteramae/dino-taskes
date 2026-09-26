@@ -76,6 +76,11 @@ function Termos() {
             <li>se entrar com Google, o identificador e o e-mail que o Google devolve</li>
           </ul>
           <p>
+            No celular, o uso de dados móveis se limita ao que você faz na hora: entrar, ler e salvar a sua lista,
+            guardar o tema se você permitir e, só se você ligar, enviar um aviso. Fechar o app interrompe esses envios.
+            Nada disso é vendido nem usado para anúncio.
+          </p>
+          <p>
             Esses dados servem para autenticar você, mostrar só a sua lista e lembrar as preferências. Não vendemos
             dados e não usamos a lista para anúncio.
           </p>
