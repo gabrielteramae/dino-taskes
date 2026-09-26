@@ -1,9 +1,10 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { Link } from "@tanstack/react-router";
+import { applyCookieChoice, readCookieChoice, type ConsentChoice } from "@/lib/cookies";
 
 const KEY = "cookie-banner";
 
-export type ConsentChoice = "essential" | "all";
+export type { ConsentChoice };
 
 let choice: ConsentChoice | "" | null = null;
 const listeners = new Set<() => void>();
@@ -13,11 +14,13 @@ function emit() {
 }
 
 function readStored(): ConsentChoice | "" {
+  const fromCookie = readCookieChoice();
+  if (fromCookie) return fromCookie;
   try {
     const value = localStorage.getItem(KEY);
     return value === "all" || value === "essential" ? value : "";
   } catch {
-    return "essential";
+    return "";
   }
 }
 
@@ -40,6 +43,17 @@ export function consentLabel(value: ConsentChoice | "" | null) {
   return "Ainda sem escolha.";
 }
 
+export function saveConsent(value: ConsentChoice) {
+  applyCookieChoice(value);
+  try {
+    localStorage.setItem(KEY, value);
+  } catch {
+    /* ignore */
+  }
+  choice = value;
+  emit();
+}
+
 export function reopenConsent() {
   try {
     localStorage.removeItem(KEY);
@@ -50,22 +64,14 @@ export function reopenConsent() {
   emit();
 }
 
-function saveConsent(value: ConsentChoice) {
-  try {
-    localStorage.setItem(KEY, value);
-  } catch {
-    /* ignore */
-  }
-  choice = value;
-  emit();
-}
-
 export function CookieConsent() {
   const current = useSyncExternalStore(subscribe, snapshot, () => null);
 
   useEffect(() => {
     if (choice !== null) return;
-    choice = readStored();
+    const stored = readStored();
+    choice = stored;
+    if (stored) applyCookieChoice(stored);
     emit();
   }, []);
 
