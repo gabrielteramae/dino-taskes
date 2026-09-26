@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { AuthScreen, SettingGroup, SettingRow } from "@/components/auth-screen";
+import { consentLabel, reopenConsent, useConsentChoice } from "@/components/cookie-consent";
 import { Button } from "@/components/ui/button";
 import { deleteAllTasks, exportMyData } from "@/lib/tasks";
 
@@ -44,6 +45,8 @@ function Privacidade() {
     }
   };
 
+  const consent = useConsentChoice();
+
   return (
     <AuthScreen title="Privacidade">
       <p className="mb-4 text-sm text-muted">
@@ -53,6 +56,11 @@ function Privacidade() {
         <SettingRow title="Dados guardados" hint="E-mail da conta, nome e tarefas. Senha nunca fica visível." />
         <SettingRow title="Acesso" hint="Cada pedido no servidor usa a sua sessão. Sem ID enviado pelo aparelho." />
         <SettingRow title="Sem rastreio extra" hint="Não vendemos dados e não tem feed público." />
+        <SettingRow title="Banner de privacidade" hint={consentLabel(consent)}>
+          <button type="button" onClick={reopenConsent} className="text-sm font-medium text-accent">
+            Configurar
+          </button>
+        </SettingRow>
       </SettingGroup>
 
       <div className="mt-6 flex flex-col gap-3">
