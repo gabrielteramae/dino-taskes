@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
@@ -9,26 +9,121 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
+const GREENS = ["#145c32", "#176b34", "#1f7a3a", "#248a42", "#2f9a4a", "#3d9a56", "#4dba62"];
+
+function FallingField() {
+  const ref = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let width = 0;
+    let height = 0;
+    let frame = 0;
+
+    type Dot = {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      r: number;
+      color: string;
+      glow: boolean;
+    };
+
+    const dots: Dot[] = [];
+
+    const spawn = (anywhere: boolean, glow = false) => {
+      dots.push({
+        x: Math.random() * width,
+        y: anywhere ? Math.random() * height : -12,
+        vx: (Math.random() - 0.5) * (glow ? 0.15 : 0.4),
+        vy: glow ? 0.15 + Math.random() * 0.25 : 0.15 + Math.random() * 0.35,
+        r: glow ? 18 + Math.random() * 36 : 1.4 + Math.random() * 2.8,
+        color: GREENS[Math.floor(Math.random() * GREENS.length)] ?? "#3d9a56",
+        glow,
+      });
+    };
+
+    const resize = () => {
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      width = canvas.clientWidth;
+      height = canvas.clientHeight;
+      canvas.width = Math.floor(width * ratio);
+      canvas.height = Math.floor(height * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    };
+
+    resize();
+    const observer = new ResizeObserver(resize);
+    observer.observe(canvas);
+    for (let i = 0; i < 36; i += 1) spawn(true);
+    for (let i = 0; i < 7; i += 1) spawn(true, true);
+
+    const gravity = 0.028;
+    let raf = 0;
+
+    const paint = () => {
+      ctx.clearRect(0, 0, width, height);
+      const top = ctx.createRadialGradient(width * 0.15, 0, 0, width * 0.15, 0, width * 0.85);
+      top.addColorStop(0, "rgba(61,154,86,0.28)");
+      top.addColorStop(1, "rgba(61,154,86,0)");
+      ctx.fillStyle = top;
+      ctx.fillRect(0, 0, width, height);
+      const corner = ctx.createRadialGradient(width, height, 0, width, height, width * 0.7);
+      corner.addColorStop(0, "rgba(23,107,52,0.22)");
+      corner.addColorStop(1, "rgba(23,107,52,0)");
+      ctx.fillStyle = corner;
+      ctx.fillRect(0, 0, width, height);
+
+      if (!reduce && !document.hidden) {
+        if (dots.filter((dot) => !dot.glow).length < 54) spawn(false);
+        if (dots.filter((dot) => dot.glow).length < 7) spawn(false, true);
+        for (let i = dots.length - 1; i >= 0; i -= 1) {
+          const dot = dots[i];
+          if (!dot) continue;
+          dot.vy += dot.glow ? gravity * 0.35 : gravity;
+          dot.x += dot.vx;
+          dot.y += dot.vy;
+          const enter = Math.min(1, (dot.y + 20) / 80);
+          const exit = Math.max(0, 1 - Math.max(0, dot.y - height * 0.62) / (height * 0.42));
+          const fade = Math.max(0, Math.min(1, enter * exit));
+          ctx.globalAlpha = fade * (dot.glow ? 0.55 : 1);
+          if (dot.glow) {
+            const glow = ctx.createRadialGradient(dot.x, dot.y, 0, dot.x, dot.y, dot.r);
+            glow.addColorStop(0, "rgba(61,154,86,0.45)");
+            glow.addColorStop(1, "rgba(61,154,86,0)");
+            ctx.fillStyle = glow;
+          } else {
+            ctx.fillStyle = dot.color;
+          }
+          ctx.beginPath();
+          ctx.arc(dot.x, dot.y, dot.r, 0, Math.PI * 2);
+          ctx.fill();
+          if (dot.y - dot.r > height + 8) dots.splice(i, 1);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      frame = window.requestAnimationFrame(paint);
+    };
+
+    frame = window.requestAnimationFrame(paint);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, []);
+
+  return <canvas ref={ref} className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true" />;
+}
+
 const GENERIC_AUTH_ERROR = "Não foi possível entrar. Confira os dados e tente de novo.";
 const GOOGLE = GROK_PROVIDERS.find((p) => p.idp === "google");
-
-const FALLING = [
-  { left: "6%", size: 7, delay: "-1s", duration: "11s", sway: "14px", color: "#1f7a3a" },
-  { left: "14%", size: 5, delay: "-6s", duration: "13s", sway: "-10px", color: "#3d9a56" },
-  { left: "22%", size: 9, delay: "-3s", duration: "15s", sway: "8px", color: "#2f9a4a" },
-  { left: "31%", size: 4, delay: "-9s", duration: "10s", sway: "-16px", color: "#4dba62" },
-  { left: "39%", size: 8, delay: "-2s", duration: "14s", sway: "12px", color: "#176b34" },
-  { left: "47%", size: 5, delay: "-7s", duration: "12s", sway: "-8px", color: "#3d9a56" },
-  { left: "55%", size: 10, delay: "-4s", duration: "16s", sway: "18px", color: "#248a42" },
-  { left: "63%", size: 4, delay: "-11s", duration: "11s", sway: "-12px", color: "#4dba62" },
-  { left: "71%", size: 7, delay: "-5s", duration: "13s", sway: "10px", color: "#1f7a3a" },
-  { left: "79%", size: 6, delay: "-8s", duration: "15s", sway: "-14px", color: "#2f9a4a" },
-  { left: "87%", size: 8, delay: "-1.5s", duration: "12s", sway: "6px", color: "#176b34" },
-  { left: "94%", size: 4, delay: "-10s", duration: "14s", sway: "-6px", color: "#3d9a56" },
-  { left: "18%", size: 6, delay: "-12s", duration: "17s", sway: "20px", color: "#248a42" },
-  { left: "58%", size: 5, delay: "-14s", duration: "9s", sway: "-18px", color: "#1f7a3a" },
-  { left: "76%", size: 9, delay: "-13s", duration: "18s", sway: "9px", color: "#4dba62" },
-] as const;
 
 function GoogleMark() {
   return (
@@ -95,25 +190,7 @@ function Login() {
   return (
     <main className="login-glow relative min-h-dvh overflow-hidden bg-bg text-fg">
       <div className="login-grid" aria-hidden="true" />
-      <div className="gradient-mesh" aria-hidden="true">
-        {FALLING.map((dot) => (
-          <span
-            key={`${dot.left}-${dot.delay}`}
-            className="mesh-node"
-            style={{
-              left: dot.left,
-              width: dot.size,
-              height: dot.size,
-              background: dot.color,
-              animationDelay: dot.delay,
-              animationDuration: dot.duration,
-              ["--sway" as string]: dot.sway,
-            }}
-          />
-        ))}
-      </div>
-      <div className="login-beam login-beam-a" aria-hidden="true" />
-      <div className="login-beam login-beam-b" aria-hidden="true" />
+      <FallingField />
       <div className="login-rise relative mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-5 py-10">
         <div className="login-card">
         <h1 className="login-field text-3xl font-semibold tracking-tight" style={{ animationDelay: "40ms" }}>
