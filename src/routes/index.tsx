@@ -20,6 +20,7 @@ import {
   type TaskRow,
 } from "@/lib/tasks";
 import { getPrefs } from "@/lib/prefs";
+import { notifyDone, notifyDue } from "@/lib/notify";
 import { AccountMenu } from "@/components/account-menu";
 import { cn } from "@/lib/utils";
 import { calendarDay, clockOf, formatRange, spanDays, withClock } from "@/lib/dates";
@@ -253,6 +254,8 @@ function TaskBoard() {
   const orderRef = useRef<string[] | null>(null);
   const dragIdRef = useRef<string | null>(null);
   const tails = useRef(new Map<string, Promise<void>>());
+  const filtersRef = useRef({ today: false, late: false, done: false });
+  const loadedRef = useRef<TaskRow[] | null>(null);
 
   const chain = (id: string, job: () => Promise<void>) => {
     const prev = tails.current.get(id) ?? Promise.resolve();
@@ -262,10 +265,16 @@ function TaskBoard() {
 
   useEffect(() => {
     let cancelled = false;
+    const ping = () => {
+      if (cancelled || !loadedRef.current) return;
+      notifyDue(loadedRef.current, filtersRef.current);
+    };
     listTasks()
       .then((rows) => {
         if (cancelled) return;
         setTasks(rows);
+        loadedRef.current = rows;
+        ping();
       })
       .catch((err) => {
         if (isUnauthorized(err) || cancelled) return;
@@ -278,6 +287,8 @@ function TaskBoard() {
         if (cancelled) return;
         setConfirmDelete(p.confirmDelete);
         setDisplayName(p.displayName);
+        filtersRef.current = { today: p.notifyToday, late: p.notifyLate, done: p.notifyDone };
+        ping();
       })
       .catch(() => undefined);
     void getStreak()
@@ -325,9 +336,13 @@ function TaskBoard() {
   };
 
   const toggle = async (id: string) => {
+    const current = tasksRef.current.find((task) => task.id === id);
+    const willDone = !current?.done;
     const next = tasksRef.current.map((task) => (task.id === id ? { ...task, done: !task.done } : task));
     tasksRef.current = next;
+    loadedRef.current = next;
     setTasks(next);
+    if (willDone && filtersRef.current.done && current) notifyDone(id, current.text);
     chain(id, async () => {
       const desired = tasksRef.current.find((task) => task.id === id)?.done;
       if (desired === undefined) return;

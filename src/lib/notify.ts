@@ -1,11 +1,43 @@
+import { spanDays } from "./dates.ts";
+
 type DueTask = { id: string; text: string; done: boolean; dueAt: string | null; endsAt?: string | null };
+
+export type NotifyFilters = { today: boolean; late: boolean; done: boolean };
+
+export function localDay(date = new Date()) {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+export function tasksForFilters(tasks: DueTask[], filters: Pick<NotifyFilters, "today" | "late">, today = localDay()) {
+  const picked: DueTask[] = [];
+  for (const task of tasks) {
+    if (task.done) continue;
+    const days = spanDays(task.dueAt, task.endsAt ?? null);
+    const end = days[days.length - 1];
+    if (!end) continue;
+    if (end < today) {
+      if (filters.late) picked.push(task);
+    } else if (filters.today && days.includes(today)) {
+      picked.push(task);
+    }
+  }
+  return picked;
+}
 
 export function notificationsSupported() {
   return typeof Notification !== "undefined";
 }
 
-export function notifyNow(_title: string, _body: string, _tag: string) {
-  return false;
+export function notifyNow(title: string, body: string, tag: string) {
+  if (!notificationsSupported() || Notification.permission !== "granted") return false;
+  try {
+    new Notification(title, { body, tag });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function claim(tag: string) {
@@ -19,28 +51,19 @@ function claim(tag: string) {
   }
 }
 
-export function notifyDue(tasks: DueTask[]) {
-  const start = new Date();
-  start.setHours(23, 59, 59, 999);
-  const due = tasks.filter((task) => {
-    if (task.done) return false;
-    const begin = task.dueAt ? new Date(task.dueAt) : null;
-    const finish = task.endsAt ? new Date(task.endsAt) : begin;
-    if (!finish || Number.isNaN(finish.getTime())) return false;
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    const beginMs = begin && !Number.isNaN(begin.getTime()) ? begin.getTime() : finish.getTime();
-    return beginMs <= start.getTime() && finish.getTime() >= startOfToday.getTime() || finish.getTime() < startOfToday.getTime();
-  });
-  if (due.length === 0) return null;
-  const day = new Date().toISOString().slice(0, 10);
-  const names = due.slice(0, 3).map((task) => task.text);
-  const extra = due.length > 3 ? ` e mais ${due.length - 3}` : "";
-  const title = due.length === 1 ? "1 tarefa para hoje" : `${due.length} tarefas para hoje`;
-  const body = `${names.join(", ")}${extra}`;
-  if (!claim(`due:${day}`)) return null;
-  notifyNow(title, body, `due:${day}`);
-  return { title, body };
+export function notifyDue(tasks: DueTask[], filters: Pick<NotifyFilters, "today" | "late">) {
+  if (!filters.today && !filters.late) return;
+  const picked = tasksForFilters(tasks, filters);
+  if (picked.length === 0) return;
+  const day = localDay();
+  if (!claim(`due:${day}:${filters.today ? "h" : ""}${filters.late ? "a" : ""}`)) return;
+  const names = picked
+    .slice(0, 3)
+    .map((task) => task.text)
+    .join(", ");
+  const extra = picked.length > 3 ? ` e mais ${picked.length - 3}` : "";
+  const title = filters.late && !filters.today ? "Tarefas atrasadas" : filters.today && !filters.late ? "Tarefas de hoje" : "Tarefas na agenda";
+  notifyNow(title, `${names}${extra}`, `due:${day}`);
 }
 
 export function notifyDone(id: string, text: string) {

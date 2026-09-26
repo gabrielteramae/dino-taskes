@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
-
 import { isThemeMode, type ThemeMode } from "@/lib/theme";
 
 export type UserPrefs = {
@@ -10,8 +9,9 @@ export type UserPrefs = {
   dinoTalks: boolean;
   dinoSmall: boolean;
   confirmDelete: boolean;
+  notifyToday: boolean;
+  notifyLate: boolean;
   notifyDone: boolean;
-  notifyDino: boolean;
   theme: ThemeMode;
 };
 
@@ -20,8 +20,9 @@ const DEFAULTS: UserPrefs = {
   dinoTalks: true,
   dinoSmall: false,
   confirmDelete: false,
+  notifyToday: false,
+  notifyLate: false,
   notifyDone: false,
-  notifyDino: false,
   theme: "dark",
 };
 
@@ -32,6 +33,21 @@ function asBool(v: unknown, fallback: boolean) {
   return fallback;
 }
 
+function readFilters(raw: unknown) {
+  const picked = new Set(typeof raw === "string" ? raw.split(",").filter(Boolean) : []);
+  return {
+    notifyToday: picked.has("hoje"),
+    notifyLate: picked.has("atraso"),
+    notifyDone: picked.has("feita"),
+  };
+}
+
+function writeFilters(prefs: Pick<UserPrefs, "notifyToday" | "notifyLate" | "notifyDone">) {
+  return [prefs.notifyToday ? "hoje" : "", prefs.notifyLate ? "atraso" : "", prefs.notifyDone ? "feita" : ""]
+    .filter(Boolean)
+    .join(",");
+}
+
 function rowToPrefs(row: Record<string, unknown> | undefined): UserPrefs {
   if (!row) return { ...DEFAULTS };
   return {
@@ -39,8 +55,7 @@ function rowToPrefs(row: Record<string, unknown> | undefined): UserPrefs {
     dinoTalks: asBool(row.dino_talks, true),
     dinoSmall: asBool(row.dino_small, false),
     confirmDelete: asBool(row.confirm_delete, false),
-    notifyDone: asBool(row.notify_done, false),
-    notifyDino: asBool(row.notify_dino, false),
+    ...readFilters(row.notify_filters),
     theme: isThemeMode(row.theme) ? row.theme : "dark",
   };
 }
@@ -60,8 +75,9 @@ const Patch = z
     dinoTalks: z.boolean().optional(),
     dinoSmall: z.boolean().optional(),
     confirmDelete: z.boolean().optional(),
+    notifyToday: z.boolean().optional(),
+    notifyLate: z.boolean().optional(),
     notifyDone: z.boolean().optional(),
-    notifyDino: z.boolean().optional(),
     theme: z.enum(["dark", "light"]).optional(),
   })
   .strict();
@@ -71,7 +87,7 @@ export const getPrefs = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<UserPrefs> => {
     const sql = await getSql();
     const rows = await sql<Record<string, unknown>>`
-      select display_name, dino_talks, dino_small, confirm_delete, notify_done, notify_dino, theme
+      select display_name, dino_talks, dino_small, confirm_delete, notify_filters, theme
       from user_prefs where user_id = ${context.userId}
     `;
     if (rows[0]) return rowToPrefs(rows[0]);
@@ -88,35 +104,35 @@ export const updatePrefs = createServerFn({ method: "POST" })
   .handler(async ({ context, data }): Promise<UserPrefs> => {
     const sql = await getSql();
     const currentRows = await sql<Record<string, unknown>>`
-      select display_name, dino_talks, dino_small, confirm_delete, notify_done, notify_dino, theme
+      select display_name, dino_talks, dino_small, confirm_delete, notify_filters, theme
       from user_prefs where user_id = ${context.userId}
     `;
     const current = rowToPrefs(currentRows[0]);
     const next: UserPrefs = {
-      displayName:
-        data.displayName !== undefined ? sanitizeName(data.displayName) : current.displayName,
+      displayName: data.displayName !== undefined ? sanitizeName(data.displayName) : current.displayName,
       dinoTalks: data.dinoTalks ?? current.dinoTalks,
       dinoSmall: data.dinoSmall ?? current.dinoSmall,
       confirmDelete: data.confirmDelete ?? current.confirmDelete,
+      notifyToday: data.notifyToday ?? current.notifyToday,
+      notifyLate: data.notifyLate ?? current.notifyLate,
       notifyDone: data.notifyDone ?? current.notifyDone,
-      notifyDino: data.notifyDino ?? current.notifyDino,
       theme: data.theme ?? current.theme,
     };
+    const filters = writeFilters(next);
     await sql`
       insert into user_prefs (
-        user_id, display_name, dino_talks, dino_small, confirm_delete, notify_done, notify_dino, theme, updated_at
+        user_id, display_name, dino_talks, dino_small, confirm_delete, notify_filters, theme, updated_at
       )
       values (
         ${context.userId}, ${next.displayName}, ${next.dinoTalks}, ${next.dinoSmall},
-        ${next.confirmDelete}, ${next.notifyDone}, ${next.notifyDino}, ${next.theme}, now()
+        ${next.confirmDelete}, ${filters}, ${next.theme}, now()
       )
       on conflict (user_id) do update set
         display_name = excluded.display_name,
         dino_talks = excluded.dino_talks,
         dino_small = excluded.dino_small,
         confirm_delete = excluded.confirm_delete,
-        notify_done = excluded.notify_done,
-        notify_dino = excluded.notify_dino,
+        notify_filters = excluded.notify_filters,
         theme = excluded.theme,
         updated_at = now()
     `;
