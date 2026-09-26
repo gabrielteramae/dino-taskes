@@ -551,8 +551,7 @@ function TaskBoard() {
       <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col px-5 pt-10 pb-40 sm:pt-14">
         <header className="mb-6 flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-medium tracking-[0.18em] text-accent uppercase">Fantasma</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-fg">{titles[tab]}</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-fg">{titles[tab]}</h1>
             <p className="mt-2 text-sm text-muted">
               {ready
                 ? remaining === 0

@@ -50,7 +50,7 @@ function Perfil() {
             {initial}
           </span>
         )}
-        <p className="text-sm text-muted">{user?.primaryEmail ?? "Conta Fantasma"}</p>
+        <p className="text-sm text-muted">{user?.primaryEmail ?? "Sua conta"}</p>
       </div>
 
       <SettingGroup>

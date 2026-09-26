@@ -6,7 +6,7 @@ import { getPrefs } from "@/lib/prefs";
 import { applyTheme, readStoredTheme } from "@/lib/theme";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "Fantasma";
+const APP_NAME = "Tarefas";
 
 export const Route = createRootRoute({
   head: () => ({

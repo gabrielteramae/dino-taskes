@@ -45,9 +45,9 @@ function Notificacoes() {
             onCheckedChange={(v) => void patch({ notifyDone: v })}
           />
         </SettingRow>
-        <SettingRow title="Fantasma ocioso" hint="Se a lista parar, ele cochila e chama você.">
+        <SettingRow title="Quando ocioso" hint="Se a lista parar, ele cochila e chama você.">
           <Switch
-            label="Fantasma ocioso"
+            label="Quando ocioso"
             checked={prefs?.notifyDino ?? true}
             onCheckedChange={(v) => void patch({ notifyDino: v })}
           />

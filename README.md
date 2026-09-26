@@ -1,4 +1,4 @@
-# 👻 Fantasma — React + TanStack Start
+# Lista de tarefas — React + TanStack Start
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat&logo=typescript&logoColor=white)
@@ -50,7 +50,7 @@ Fluxo conferido com o app rodando (`npm run dev`), inclusive no tamanho de celul
 - Adicionar tarefa e ver o emoji ao lado do texto
 - Abrir a Agenda e marcar o dia
 - Trocar de aba na barra de baixo (Tarefas, Agenda, Feitas)
-- Fantasma do mesmo tamanho em todas as poses, inclusive cochilando
+- Mascote do mesmo tamanho em todas as poses, inclusive cochilando
 
 ## 🚀 Como rodar
 

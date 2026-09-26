@@ -19,7 +19,7 @@ function Privacidade() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "fantasma.json";
+      a.download = "tarefas.json";
       a.click();
       URL.revokeObjectURL(url);
       setStatus("Arquivo baixado neste aparelho.");

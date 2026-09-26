@@ -69,16 +69,16 @@ function Configuracoes() {
             ))}
           </div>
         </SettingRow>
-        <SettingRow title="Fantasma fala" hint="Balões de texto quando ele reage.">
+        <SettingRow title="Ele fala" hint="Balões de texto quando ele reage.">
           <Switch
-            label="Fantasma fala"
+            label="Ele fala"
             checked={prefs?.dinoTalks ?? true}
             onCheckedChange={(v) => void patch({ dinoTalks: v })}
           />
         </SettingRow>
-        <SettingRow title="Fantasma compacto" hint="Menor no canto, melhor no celular.">
+        <SettingRow title="Tamanho compacto" hint="Menor no canto, melhor no celular.">
           <Switch
-            label="Fantasma compacto"
+            label="Tamanho compacto"
             checked={prefs?.dinoSmall ?? false}
             onCheckedChange={(v) => void patch({ dinoSmall: v })}
           />

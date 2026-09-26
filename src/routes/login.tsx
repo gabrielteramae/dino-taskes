@@ -54,7 +54,7 @@ function Login() {
         const { error: signUpError } = await authClient.signUp.email({
           email: cleanEmail,
           password,
-          name: cleanEmail.split("@")[0] || "Fantasma",
+          name: cleanEmail.split("@")[0] || "Você",
         });
         if (signUpError) throw new Error("auth");
       } else {
@@ -76,8 +76,7 @@ function Login() {
       <div className="login-orb login-orb-a" aria-hidden="true" />
       <div className="login-orb login-orb-b" aria-hidden="true" />
       <div className="login-rise relative mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-5 py-10">
-        <p className="text-xs font-medium tracking-[0.18em] text-accent uppercase">Fantasma</p>
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight">
+        <h1 className="text-3xl font-semibold tracking-tight">
           {mode === "signin" ? "Bem-vindo de volta" : "Crie sua conta"}
         </h1>
         <p className="mt-2 text-sm text-muted">
