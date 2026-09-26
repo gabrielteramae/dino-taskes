@@ -105,4 +105,4 @@ Este projeto é um gestor de tarefas simples, no tamanho de um app de celular: e
 
 ---
 
-© 2026 Gabriel Teramae Chan
+© 2026 Gabriel Teramae Chan. Todos os direitos reservados.

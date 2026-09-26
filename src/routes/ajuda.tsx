@@ -39,6 +39,9 @@ function Ajuda() {
           <SettingRow key={item.title} title={item.title} hint={item.hint} />
         ))}
       </SettingGroup>
+      <p className="mt-8 text-center text-[11px] leading-relaxed text-subtle">
+        © 2026 Gabriel Teramae Chan. Todos os direitos reservados.
+      </p>
     </AuthScreen>
   );
 }

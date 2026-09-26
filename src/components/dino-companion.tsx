@@ -4,12 +4,12 @@ import { cn } from "@/lib/utils";
 export type DinoMood = "idle" | "wave" | "celebrate" | "think" | "sleep" | "shy";
 
 const POSES: Record<DinoMood, string> = {
-  idle: "/dino/idle.webp?v=7",
-  wave: "/dino/wave.webp?v=7",
-  celebrate: "/dino/celebrate.webp?v=7",
-  think: "/dino/think.webp?v=7",
-  sleep: "/dino/sleep.webp?v=7",
-  shy: "/dino/shy.webp?v=7",
+  idle: "/dino/idle.webp?v=8",
+  wave: "/dino/wave.webp?v=8",
+  celebrate: "/dino/celebrate.webp?v=8",
+  think: "/dino/think.webp?v=8",
+  sleep: "/dino/sleep.webp?v=8",
+  shy: "/dino/shy.webp?v=8",
 };
 
 const MOODS = Object.keys(POSES) as DinoMood[];
