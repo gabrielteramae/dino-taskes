@@ -1,7 +1,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { Link } from "@tanstack/react-router";
 
-const KEY = "cookie-consent";
+const KEY = "cookie-banner";
 
 export type ConsentChoice = "essential" | "all";
 
@@ -35,8 +35,8 @@ export function useConsentChoice() {
 }
 
 export function consentLabel(value: ConsentChoice | "" | null) {
-  if (value === "all") return "Você aceitou o aviso.";
-  if (value === "essential") return "Só o cookie de sessão, o necessário para entrar.";
+  if (value === "all") return "Cookies aceitos.";
+  if (value === "essential") return "Só o cookie necessário para entrar.";
   return "Ainda sem escolha.";
 }
 
@@ -74,17 +74,20 @@ export function CookieConsent() {
   return (
     <div
       role="dialog"
-      aria-labelledby="privacy-banner-title"
-      className="fixed inset-x-3 bottom-24 z-50 mx-auto max-w-lg rounded-2xl border border-border bg-surface p-4 shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
+      aria-labelledby="cookie-banner-title"
+      className="cookie-banner fixed inset-x-3 bottom-24 z-50 mx-auto max-w-lg rounded-2xl border border-border bg-surface p-4 shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
     >
-      <p id="privacy-banner-title" className="text-sm font-medium text-fg">
-        Privacidade
+      <p id="cookie-banner-title" className="text-sm font-medium text-fg">
+        Cookies
       </p>
       <p className="mt-1 text-sm leading-relaxed text-muted">
-        Usamos um cookie de sessão para manter o login. Não há cookie de anúncio. O tema fica só neste aparelho.{" "}
+        Um cookie de sessão mantém o login. Não usamos cookie de anúncio.{" "}
         <Link to="/termos" hash="privacidade" className="font-medium text-accent hover:underline">
-          Ler a política
+          Política de privacidade
         </Link>
+      </p>
+      <p className="mt-3 rounded-lg bg-surface-2 px-3 py-2 text-xs text-muted">
+        Necessário: sessão da conta. Opcional: nenhum.
       </p>
       <div className="mt-3 flex gap-2">
         <button
@@ -92,7 +95,7 @@ export function CookieConsent() {
           onClick={() => saveConsent("essential")}
           className="h-10 flex-1 rounded-lg border border-border text-sm text-fg"
         >
-          Só o necessário
+          Recusar opcionais
         </button>
         <button
           type="button"

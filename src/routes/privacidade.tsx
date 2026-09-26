@@ -56,7 +56,7 @@ function Privacidade() {
         <SettingRow title="Dados guardados" hint="E-mail da conta, nome e tarefas. Senha nunca fica visível." />
         <SettingRow title="Acesso" hint="Cada pedido no servidor usa a sua sessão. Sem ID enviado pelo aparelho." />
         <SettingRow title="Sem rastreio extra" hint="Não vendemos dados e não tem feed público." />
-        <SettingRow title="Banner de privacidade" hint={consentLabel(consent)}>
+        <SettingRow title="Banner de cookies" hint={consentLabel(consent)}>
           <button type="button" onClick={reopenConsent} className="text-sm font-medium text-accent">
             Configurar
           </button>
