@@ -65,9 +65,11 @@ html[data-theme="dark"] {
   html,
   body,
   #app {
-    min-height: 100%;
+    height: var(--app-h, 100dvh);
     min-height: 100dvh;
+    min-height: -webkit-fill-available;
     background: var(--color-bg);
+    overscroll-behavior: none;
     touch-action: manipulation;
   }
 
@@ -76,6 +78,7 @@ html[data-theme="dark"] {
     color: var(--color-fg);
     font-family: var(--font-sans);
     overflow-x: hidden;
+    overscroll-behavior-y: none;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -84,19 +87,20 @@ html[data-theme="dark"] {
     cursor: pointer;
   }
 
-  input[type="date"],
-  input[type="time"],
-  input[type="datetime-local"] {
-    min-width: 0;
-    max-width: 100%;
+  input,
+  select,
+  textarea {
     font-size: 16px;
   }
 }
 
 .app-frame {
   display: flex;
-  min-height: var(--app-h, 100dvh);
+  height: var(--app-h, 100dvh);
+  max-height: var(--app-h, 100dvh);
+  min-height: -webkit-fill-available;
   flex-direction: column;
+  overflow: hidden;
   background: var(--color-bg);
 }
 
@@ -105,24 +109,25 @@ html[data-theme="dark"] {
   min-height: 0;
   flex: 1;
   flex-direction: column;
-  overflow: auto;
-  padding-top: max(6.75rem, calc(env(safe-area-inset-top) + 3.25rem));
-  padding-right: max(1.25rem, env(safe-area-inset-right));
-  padding-bottom: 1.25rem;
-  padding-left: max(1.25rem, env(safe-area-inset-left));
+  overflow: hidden;
+  padding-top: calc(max(env(safe-area-inset-top, 0px), 3rem) + 3.25rem);
+  padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+  padding-bottom: 0.75rem;
+  padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+  -webkit-overflow-scrolling: touch;
 }
 
 @media (min-width: 768px) {
   .app-shell {
-    padding-top: max(1.75rem, env(safe-area-inset-top));
+    padding-top: max(1.75rem, env(safe-area-inset-top, 0px));
   }
 }
 
 .page-shell {
-  padding-top: max(1.75rem, env(safe-area-inset-top));
-  padding-right: max(1.25rem, env(safe-area-inset-right));
-  padding-bottom: max(2rem, env(safe-area-inset-bottom));
-  padding-left: max(1.25rem, env(safe-area-inset-left));
+  padding-top: calc(max(env(safe-area-inset-top, 0px), 3rem) + 1.25rem);
+  padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+  padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
 }
 
 @keyframes dino-bob {

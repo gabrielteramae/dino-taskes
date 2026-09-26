@@ -4,6 +4,7 @@ import { Check, GripVertical, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DockNav, type DockTab } from "@/components/dock-nav";
+import { PhoneScroll } from "@/components/phone-scroll";
 import { RedirectToSignIn } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import {
@@ -662,7 +663,7 @@ function TaskBoard() {
   return (
     <main className="app-frame text-fg">
       <div className="app-shell mx-auto w-full max-w-lg">
-        <header className="mb-5 flex items-center justify-between gap-3">
+        <header className="mb-5 flex shrink-0 items-center justify-between gap-3">
           {tab === "tarefas" ? (
             <div className="min-w-0">
               <h1 className="text-2xl font-semibold tracking-tight">
@@ -689,7 +690,7 @@ function TaskBoard() {
 
         {tab === "tarefas" ? (
           <form
-            className="mb-6 flex flex-col gap-3"
+            className="mb-6 flex shrink-0 flex-col gap-3"
             onSubmit={(event) => {
               event.preventDefault();
               void add();
@@ -712,7 +713,7 @@ function TaskBoard() {
         ) : null}
 
         {tab === "tarefas" ? (
-          <div className="mb-4 flex flex-col gap-3">
+          <div className="mb-4 flex shrink-0 flex-col gap-3">
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -727,7 +728,7 @@ function TaskBoard() {
                     type="button"
                     onClick={() => setGroup(group === item.id ? null : item.id)}
                     className={cn(
-                      "rounded-full px-3 py-1.5 text-xs",
+                      "min-h-11 rounded-full px-3 text-xs",
                       group === item.id ? "bg-fg text-bg" : "bg-surface text-muted",
                     )}
                   >
@@ -740,7 +741,7 @@ function TaskBoard() {
         ) : null}
 
         {tab === "feitas" ? (
-          <div className="mb-4 grid grid-cols-3 gap-2">
+          <div className="mb-4 grid shrink-0 grid-cols-3 gap-2">
             {(
               [
                 ["Feitas", String(tasks.filter((task) => task.done).length)],
@@ -756,22 +757,24 @@ function TaskBoard() {
           </div>
         ) : null}
 
-        {tab === "hoje" ? (
-          <Agenda groups={agendaGroups()} ready={ready} />
-        ) : (
-          <ul className="flex flex-1 flex-col gap-3">
-            {ready && visible.length === 0 ? (
-              <li className="rounded-xl border border-border bg-surface px-5 py-10 text-center">
-                <p className="text-sm text-muted">Nada por aqui</p>
-                <p className="mt-1 text-xs text-subtle">
-                  {tab === "tarefas" ? "Escreve acima. O dia, se quiser, fica em cada tarefa." : "Quando concluir uma da lista, ela vem para cá."}
-                </p>
-              </li>
-            ) : (
-              visible.map(renderTask)
-            )}
-          </ul>
-        )}
+        <PhoneScroll>
+          {tab === "hoje" ? (
+            <Agenda groups={agendaGroups()} ready={ready} />
+          ) : (
+            <ul className="flex flex-col gap-3 pb-2">
+              {ready && visible.length === 0 ? (
+                <li className="rounded-xl border border-border bg-surface px-5 py-10 text-center">
+                  <p className="text-sm text-muted">Nada por aqui</p>
+                  <p className="mt-1 text-xs text-subtle">
+                    {tab === "tarefas" ? "Escreve acima. O dia, se quiser, fica em cada tarefa." : "Quando concluir uma da lista, ela vem para cá."}
+                  </p>
+                </li>
+              ) : (
+                visible.map(renderTask)
+              )}
+            </ul>
+          )}
+        </PhoneScroll>
       </div>
 
       <DockNav tab={tab} onChange={setTab} />
