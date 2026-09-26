@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
+import { GROK_PROVIDERS, authClient, authEnabled, keepSignedIn, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,18 +61,27 @@ function Login() {
     }
     setBusy(true);
     setError("");
+    const fetchOptions = {
+      onSuccess(ctx: { response: Response }) {
+        const token = ctx.response.headers.get("set-auth-token");
+        if (token) keepSignedIn(token);
+      },
+    };
     try {
       if (mode === "signup") {
         const { error: signUpError } = await authClient.signUp.email({
           email: cleanEmail,
           password,
           name: cleanEmail.split("@")[0] || "Você",
+          fetchOptions,
         });
         if (signUpError) throw new Error("auth");
       } else {
         const { error: signInError } = await authClient.signIn.email({
           email: cleanEmail,
           password,
+          rememberMe: true,
+          fetchOptions,
         });
         if (signInError) throw new Error("auth");
       }
