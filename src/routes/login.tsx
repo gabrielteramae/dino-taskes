@@ -76,13 +76,16 @@ function Login() {
 
   return (
     <main className="login-glow relative min-h-dvh overflow-hidden bg-bg text-fg">
-      <div className="login-orb login-orb-a" aria-hidden="true" />
-      <div className="login-orb login-orb-b" aria-hidden="true" />
+      <div className="login-grid" aria-hidden="true" />
+      <div className="login-aurora" aria-hidden="true" />
+      <div className="login-beam login-beam-a" aria-hidden="true" />
+      <div className="login-beam login-beam-b" aria-hidden="true" />
       <div className="login-rise relative mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-5 py-10">
-        <h1 className="text-3xl font-semibold tracking-tight">
+        <div className="login-card">
+        <h1 className="login-field text-3xl font-semibold tracking-tight" style={{ animationDelay: "40ms" }}>
           {mode === "signin" ? "Bem-vindo de volta" : "Crie sua conta"}
         </h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="login-field mt-2 text-sm text-muted" style={{ animationDelay: "120ms" }}>
           {mode === "signin"
             ? "Entre para continuar nas suas tarefas."
             : "Guarde a lista na sua conta, em qualquer aparelho."}
@@ -93,7 +96,7 @@ function Login() {
         ) : (
           <>
             <form className="mt-8 flex flex-col gap-3" onSubmit={submit}>
-              <label className="relative block">
+              <label className="login-field relative block" style={{ animationDelay: "180ms" }}>
                 <span className="sr-only">E-mail</span>
                 <Mail className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-subtle" />
                 <Input
@@ -109,7 +112,7 @@ function Login() {
                   required
                 />
               </label>
-              <label className="relative block">
+              <label className="login-field relative block" style={{ animationDelay: "240ms" }}>
                 <span className="sr-only">Senha</span>
                 <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-subtle" />
                 <Input
@@ -134,7 +137,7 @@ function Login() {
                 </button>
               </label>
               {error ? <p className="text-xs text-danger">{error}</p> : null}
-              <Button type="submit" disabled={busy} className="mt-1 h-12 w-full">
+              <Button type="submit" disabled={busy} className="login-field login-submit mt-1 h-12 w-full" style={{ animationDelay: "300ms" }}>
                 {busy ? "Aguarde…" : mode === "signin" ? "Entrar" : "Criar conta"}
               </Button>
             </form>
@@ -189,6 +192,7 @@ function Login() {
             </p>
           </>
         )}
+        </div>
       </div>
     </main>
   );
