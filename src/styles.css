@@ -239,6 +239,168 @@ html[data-theme="dark"] input[type="date"] {
   color-scheme: dark;
 }
 
+.load-screen {
+  position: relative;
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 46%, #1c5538 0%, #10281c 46%, #09090b 78%);
+  color: #e8f6e4;
+}
+
+.load-pulse {
+  position: absolute;
+  top: 46%;
+  left: 0;
+  width: 100%;
+  transform: translateY(-50%);
+  animation: load-line-fade 700ms ease 1.45s forwards;
+}
+
+.load-pulse-line {
+  fill: none;
+  stroke: #4dba62;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 640;
+  stroke-dashoffset: 640;
+  filter: drop-shadow(0 0 6px rgba(77, 186, 98, 0.65));
+  animation: load-draw 1.15s cubic-bezier(0.45, 0, 0.2, 1) 0.2s forwards;
+}
+
+.load-center {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  width: 11rem;
+}
+
+.load-rings {
+  position: absolute;
+  top: 0.15rem;
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.load-rings span {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(77, 186, 98, 0.55);
+  border-radius: 999px;
+  animation: load-ring 1.8s ease-out 1.15s infinite;
+}
+
+.load-rings span:last-child {
+  animation-delay: 1.85s;
+}
+
+.load-mark {
+  display: grid;
+  width: 5.5rem;
+  height: 5.5rem;
+  place-items: center;
+  border-radius: 1.35rem;
+  background: #e8f6e4;
+  box-shadow: 0 0 0 10px rgba(77, 186, 98, 0.12), 0 16px 40px rgba(0, 0, 0, 0.28);
+  animation: load-pop 560ms cubic-bezier(0.22, 1, 0.36, 1) 1.12s both;
+}
+
+.load-name {
+  margin-top: 1.35rem;
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  animation: load-rise 600ms cubic-bezier(0.22, 1, 0.36, 1) 1.45s both;
+}
+
+.load-tag {
+  margin-top: 0.3rem;
+  color: rgba(232, 246, 228, 0.72);
+  font-size: 0.85rem;
+  animation: load-rise 600ms cubic-bezier(0.22, 1, 0.36, 1) 1.65s both;
+}
+
+.load-foot {
+  position: absolute;
+  right: 12%;
+  bottom: max(2.2rem, env(safe-area-inset-bottom));
+  left: 12%;
+  color: rgba(232, 246, 228, 0.62);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.load-bar {
+  height: 2px;
+  margin-top: 0.7rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(232, 246, 228, 0.16);
+}
+
+.load-bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #4dba62;
+  animation: load-fill 2.8s cubic-bezier(0.4, 0, 0.2, 1) 0.25s forwards;
+}
+
+@keyframes load-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes load-line-fade {
+  to {
+    opacity: 0.28;
+  }
+}
+
+@keyframes load-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes load-ring {
+  from {
+    opacity: 0.7;
+    transform: scale(0.72);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.85);
+  }
+}
+
+@keyframes load-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes load-fill {
+  to {
+    width: 100%;
+  }
+}
+
 .splash-lockup {
   display: grid;
   justify-items: center;
@@ -340,6 +502,13 @@ html[data-theme="dark"] input[type="date"] {
   .cookie-banner,
   .login-rise,
   .login-submit::after,
+  .load-pulse,
+  .load-pulse-line,
+  .load-mark,
+  .load-rings span,
+  .load-name,
+  .load-tag,
+  .load-bar span,
   .splash-mark,
   .splash-name {
     animation: none;

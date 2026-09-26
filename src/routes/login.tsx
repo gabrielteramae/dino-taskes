@@ -65,18 +65,37 @@ function Login() {
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = window.setTimeout(() => setEntered(true), reduce ? 0 : 1500);
+    const timer = window.setTimeout(() => setEntered(true), reduce ? 0 : 3200);
     return () => window.clearTimeout(timer);
   }, []);
 
   if (!entered || isPending) {
     return (
-      <main className="grid min-h-dvh place-items-center bg-bg text-fg">
-        <div className="splash-lockup">
-          <svg viewBox="0 0 64 64" className="splash-mark size-20" aria-hidden="true">
-            <path d="M14 34.5 26.5 47 50 20" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <p className="splash-name">Tarefas</p>
+      <main className="load-screen" aria-label="Abrindo o app">
+        <svg className="load-pulse" viewBox="0 0 360 80" aria-hidden="true">
+          <path
+            className="load-pulse-line"
+            d="M0 42H118l14-22 16 40 14-28 12 10H360"
+          />
+        </svg>
+        <div className="load-center">
+          <div className="load-rings" aria-hidden="true">
+            <span />
+            <span />
+          </div>
+          <div className="load-mark">
+            <svg viewBox="0 0 64 64" className="size-9 text-[#143d24]" aria-hidden="true">
+              <path d="M16 33.5 27 44.5 48 22" fill="none" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <p className="load-name">Tarefas</p>
+          <p className="load-tag">Sua lista, no seu ritmo</p>
+        </div>
+        <div className="load-foot">
+          <p>Preparando sua lista</p>
+          <div className="load-bar" aria-hidden="true">
+            <span />
+          </div>
         </div>
       </main>
     );
