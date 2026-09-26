@@ -8,23 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { strongPassword, validEmail } from "@/lib/security";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
 const GENERIC_AUTH_ERROR = "Não foi possível entrar. Confira os dados e tente de novo.";
 const PASSWORD_RULE = "A senha precisa de 8 caracteres, com maiúscula, minúscula, número e um símbolo.";
-
-function strongPassword(password: string) {
-  return (
-    password.length >= 8 &&
-    password.length <= 128 &&
-    /[A-Z]/.test(password) &&
-    /[a-z]/.test(password) &&
-    /\d/.test(password) &&
-    /[^A-Za-z0-9]/.test(password)
-  );
-}
 const GOOGLE = GROK_PROVIDERS.find((p) => p.idp === "google");
 
 function GoogleMark() {
@@ -61,7 +51,7 @@ function Login() {
     e.preventDefault();
     if (!authEnabled || busy) return;
     const cleanEmail = email.trim().toLowerCase();
-    if (!cleanEmail || password.length < 8 || password.length > 128) {
+    if (!validEmail(cleanEmail) || password.length < 8 || password.length > 128) {
       setError(GENERIC_AUTH_ERROR);
       return;
     }

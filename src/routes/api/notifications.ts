@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { getSessionUser } from "@/lib/auth/verify.server";
+import { cleanLine, safePushEndpoint } from "@/lib/security";
 
 const Message = z.object({
   title: z.string().trim().min(1).max(80),
@@ -8,7 +9,7 @@ const Message = z.object({
 });
 
 const Sub = z.object({
-  endpoint: z.string().url().max(2000),
+  endpoint: z.string().max(2000).refine((value) => safePushEndpoint(value) !== null),
   p256dh: z.string().min(1).max(300),
   auth: z.string().min(1).max(300),
 });
@@ -40,7 +41,9 @@ export const Route = createFileRoute("/api/notifications")({
         const parsed = Sub.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return json({ error: "Corpo inválido" }, 400);
         const { saveSubscription } = await import("@/lib/push.server");
-        await saveSubscription(id, parsed.data.endpoint, parsed.data.p256dh, parsed.data.auth);
+        const endpoint = safePushEndpoint(parsed.data.endpoint);
+        if (!endpoint) return json({ error: "Corpo inválido" }, 400);
+        await saveSubscription(id, endpoint, parsed.data.p256dh, parsed.data.auth);
         return json({ ok: true });
       },
       POST: async ({ request }) => {
@@ -49,15 +52,19 @@ export const Route = createFileRoute("/api/notifications")({
         const parsed = Message.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return json({ error: "Corpo inválido" }, 400);
         const { deliver } = await import("@/lib/push.server");
-        return json(await deliver(id, parsed.data.title, parsed.data.body ?? ""));
+        return json(await deliver(id, cleanLine(parsed.data.title, 80), cleanLine(parsed.data.body ?? "", 180)));
       },
       DELETE: async ({ request }) => {
         const id = await userId();
         if (!id) return json({ error: "Unauthorized" }, 401);
-        const parsed = z.object({ endpoint: z.string().url() }).safeParse(await request.json().catch(() => null));
+        const parsed = z
+          .object({ endpoint: z.string().max(2000).refine((value) => safePushEndpoint(value) !== null) })
+          .safeParse(await request.json().catch(() => null));
         if (!parsed.success) return json({ error: "Corpo inválido" }, 400);
+        const endpoint = safePushEndpoint(parsed.data.endpoint);
+        if (!endpoint) return json({ error: "Corpo inválido" }, 400);
         const { removeSubscription } = await import("@/lib/push.server");
-        await removeSubscription(id, parsed.data.endpoint);
+        await removeSubscription(id, endpoint);
         return json({ ok: true });
       },
     },
