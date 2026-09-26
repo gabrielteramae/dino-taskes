@@ -191,8 +191,34 @@ html[data-theme="dark"] input[type="date"] {
   color-scheme: dark;
 }
 
-.login-glow {
-  background: var(--color-bg);
+.splash-lockup {
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+  color: var(--color-accent);
+}
+
+.splash-mark {
+  animation: splash-in 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.splash-name {
+  color: var(--color-fg);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  animation: splash-in 800ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+
+@keyframes splash-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .login-grid {
@@ -265,7 +291,9 @@ html[data-theme="dark"] input[type="date"] {
   .bubble-in,
   .cookie-banner,
   .login-rise,
-  .login-submit::after {
+  .login-submit::after,
+  .splash-mark,
+  .splash-name {
     animation: none;
   }
 }

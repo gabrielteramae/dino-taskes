@@ -36,6 +36,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [entered, setEntered] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -62,10 +63,21 @@ function Login() {
     };
   }, []);
 
-  if (isPending) {
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(() => setEntered(true), reduce ? 0 : 1500);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (!entered || isPending) {
     return (
-      <main className="login-glow flex min-h-dvh items-center justify-center px-5">
-        <div className="h-80 w-full max-w-sm animate-pulse rounded-2xl bg-surface/60" />
+      <main className="grid min-h-dvh place-items-center bg-bg text-fg">
+        <div className="splash-lockup">
+          <svg viewBox="0 0 64 64" className="splash-mark size-20" aria-hidden="true">
+            <path d="M14 34.5 26.5 47 50 20" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <p className="splash-name">Tarefas</p>
+        </div>
       </main>
     );
   }
@@ -119,9 +131,8 @@ function Login() {
   };
 
   return (
-    <main className="login-glow relative min-h-dvh overflow-hidden bg-bg text-fg">
+    <main className="relative min-h-dvh overflow-hidden bg-bg text-fg">
       <div className="page-shell login-rise relative mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center">
-        <div className="login-card">
         <h1 className="login-field text-3xl font-semibold tracking-tight" style={{ animationDelay: "40ms" }}>
           {mode === "signin" ? "Bem-vindo de volta" : "Crie sua conta"}
         </h1>
@@ -240,7 +251,6 @@ function Login() {
             </p>
           </>
         )}
-        </div>
       </div>
     </main>
   );
