@@ -4,12 +4,12 @@ import { cn } from "@/lib/utils";
 export type DinoMood = "idle" | "wave" | "celebrate" | "think" | "sleep" | "shy";
 
 const POSES: Record<DinoMood, string> = {
-  idle: "/dino/idle.webp?v=8",
-  wave: "/dino/wave.webp?v=8",
-  celebrate: "/dino/celebrate.webp?v=8",
-  think: "/dino/think.webp?v=8",
-  sleep: "/dino/sleep.webp?v=8",
-  shy: "/dino/shy.webp?v=8",
+  idle: "/ghost/idle.webp?v=1",
+  wave: "/ghost/wave.webp?v=1",
+  celebrate: "/ghost/celebrate.webp?v=1",
+  think: "/ghost/think.webp?v=1",
+  sleep: "/ghost/sleep.webp?v=1",
+  shy: "/ghost/shy.webp?v=1",
 };
 
 const MOODS = Object.keys(POSES) as DinoMood[];
@@ -148,7 +148,7 @@ export function DinoCompanion({ mood, message, onPet, size = "md", bottomInset =
       ) : null}
       <button
         type="button"
-        aria-label="Interagir com o dino"
+        aria-label="Interagir com o fantasma"
         onPointerDown={onPointerDown}
         onClick={() => {
           if (moved.current) return;

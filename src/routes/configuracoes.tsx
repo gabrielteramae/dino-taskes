@@ -36,7 +36,7 @@ function Configuracoes() {
 
   return (
     <AuthScreen title="Configurações">
-      <p className="mb-4 text-sm text-muted">Ajuste o dino e o jeito da lista.</p>
+      <p className="mb-4 text-sm text-muted">Ajuste o fantasma e o jeito da lista.</p>
       <SettingGroup>
         <SettingRow title="Aparência" hint="Escuro é o padrão. Claro deixa o fundo claro.">
           <div className="relative grid w-[148px] grid-cols-2 rounded-full border border-border bg-surface-2 p-0.5">
@@ -69,16 +69,16 @@ function Configuracoes() {
             ))}
           </div>
         </SettingRow>
-        <SettingRow title="Dino fala" hint="Balões de texto quando ele reage.">
+        <SettingRow title="Fantasma fala" hint="Balões de texto quando ele reage.">
           <Switch
-            label="Dino fala"
+            label="Fantasma fala"
             checked={prefs?.dinoTalks ?? true}
             onCheckedChange={(v) => void patch({ dinoTalks: v })}
           />
         </SettingRow>
-        <SettingRow title="Dino compacto" hint="Menor no canto, melhor no celular.">
+        <SettingRow title="Fantasma compacto" hint="Menor no canto, melhor no celular.">
           <Switch
-            label="Dino compacto"
+            label="Fantasma compacto"
             checked={prefs?.dinoSmall ?? false}
             onCheckedChange={(v) => void patch({ dinoSmall: v })}
           />

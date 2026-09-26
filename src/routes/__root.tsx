@@ -6,7 +6,7 @@ import { getPrefs } from "@/lib/prefs";
 import { applyTheme, readStoredTheme } from "@/lib/theme";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "Dino Tarefas";
+const APP_NAME = "Fantasma";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -17,7 +17,7 @@ export const Route = createRootRoute({
       { name: "theme-color", content: "#09090b" },
       {
         name: "description",
-        content: "Lista de tarefas simples com um dinossauro verde que interage com você.",
+        content: "Lista de tarefas simples com um fantasma que interage com você.",
       },
     ],
     links: [

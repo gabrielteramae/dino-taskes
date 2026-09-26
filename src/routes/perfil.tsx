@@ -50,7 +50,7 @@ function Perfil() {
             {initial}
           </span>
         )}
-        <p className="text-sm text-muted">{user?.primaryEmail ?? "Conta Dino Tarefas"}</p>
+        <p className="text-sm text-muted">{user?.primaryEmail ?? "Conta Fantasma"}</p>
       </div>
 
       <SettingGroup>
@@ -60,7 +60,7 @@ function Perfil() {
             value={name}
             maxLength={40}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Como o dino te chama"
+            placeholder="Como o fantasma te chama"
             className="mt-2"
           />
         </div>

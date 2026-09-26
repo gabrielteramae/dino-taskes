@@ -54,7 +54,7 @@ function Login() {
         const { error: signUpError } = await authClient.signUp.email({
           email: cleanEmail,
           password,
-          name: cleanEmail.split("@")[0] || "Dino",
+          name: cleanEmail.split("@")[0] || "Fantasma",
         });
         if (signUpError) throw new Error("auth");
       } else {
@@ -76,14 +76,14 @@ function Login() {
       <div className="login-orb login-orb-a" aria-hidden="true" />
       <div className="login-orb login-orb-b" aria-hidden="true" />
       <div className="login-rise relative mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-5 py-10">
-        <p className="text-xs font-medium tracking-[0.18em] text-accent uppercase">Dino Tarefas</p>
+        <p className="text-xs font-medium tracking-[0.18em] text-accent uppercase">Fantasma</p>
         <h1 className="mt-6 text-3xl font-semibold tracking-tight">
           {mode === "signin" ? "Bem-vindo de volta" : "Crie sua conta"}
         </h1>
         <p className="mt-2 text-sm text-muted">
           {mode === "signin"
             ? "Entre para continuar nas suas tarefas."
-            : "Guarde a lista no seu dino, em qualquer aparelho."}
+            : "Guarde a lista com o fantasma, em qualquer aparelho."}
         </p>
 
         {!authEnabled ? (

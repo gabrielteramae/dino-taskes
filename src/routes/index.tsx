@@ -26,14 +26,14 @@ export const Route = createFileRoute("/")({ component: Home });
 
 const LINES = {
   hello: [
-    "Oi! Eu sou o dino. Clica em mim ou me arrasta.",
+    "Oi! Eu sou o fantasma. Clica em mim ou me arrasta.",
     "Bora organizar o dia? Eu fico de olho.",
   ],
   add: ["Anotado. Vamos nessa.", "Boa. Mais uma na lista.", "Deixa comigo, eu lembro."],
   done: ["Mandou bem.", "Riscou! Continua assim.", "Isso. Uma a menos."],
   allDone: ["Lista zerada. Merece um descanso.", "Tudo feito. Eu também vou cochilar."],
   remove: ["Tirei. Sem problema.", "Ok, essa saiu da lista."],
-  pet: ["Hehe. Faz cócegas.", "Gostei. De novo?", "Sou só um dino fofo mesmo."],
+  pet: ["Hehe. Faz cócegas.", "Gostei. De novo?", "Sou só um fantasma fofo mesmo."],
   think: ["Hmm, o que vem agora?", "Escreve, eu estou prestando atenção."],
   idle: [
     "Se quiser, me arrasta pelo canto da tela.",
@@ -551,12 +551,12 @@ function TaskBoard() {
       <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col px-5 pt-10 pb-40 sm:pt-14">
         <header className="mb-6 flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-medium tracking-[0.18em] text-accent uppercase">Dino Tarefas</p>
+            <p className="text-xs font-medium tracking-[0.18em] text-accent uppercase">Fantasma</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-fg">{titles[tab]}</h1>
             <p className="mt-2 text-sm text-muted">
               {ready
                 ? remaining === 0
-                  ? "Nada pendente. O dino está de boa."
+                  ? "Nada pendente. O fantasma está de boa."
                   : `${remaining} pendente${remaining === 1 ? "" : "s"}`
                 : "Carregando…"}
               {streak > 0 ? ` · ${streak} dia${streak === 1 ? "" : "s"} seguido${streak === 1 ? "" : "s"}` : ""}
@@ -601,7 +601,7 @@ function TaskBoard() {
               <li className="rounded-xl border border-border bg-surface px-5 py-10 text-center">
                 <p className="text-sm text-muted">Nada por aqui</p>
                 <p className="mt-1 text-xs text-subtle">
-                  {tab === "tarefas" ? "Escreve acima. O dino reage." : "Troca de aba ou cria uma tarefa."}
+                  {tab === "tarefas" ? "Escreve acima. O fantasma reage." : "Troca de aba ou cria uma tarefa."}
                 </p>
               </li>
             ) : (

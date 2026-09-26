@@ -36,7 +36,7 @@ function Notificacoes() {
 
   return (
     <AuthScreen title="Notificações">
-      <p className="mb-4 text-sm text-muted">O dino avisa no app. Opcional no sistema do celular.</p>
+      <p className="mb-4 text-sm text-muted">O fantasma avisa no app. Opcional no sistema do celular.</p>
       <SettingGroup>
         <SettingRow title="Ao concluir" hint="Ele comemora quando você risca uma tarefa.">
           <Switch
@@ -45,9 +45,9 @@ function Notificacoes() {
             onCheckedChange={(v) => void patch({ notifyDone: v })}
           />
         </SettingRow>
-        <SettingRow title="Dino ocioso" hint="Se a lista parar, ele cochila e chama você.">
+        <SettingRow title="Fantasma ocioso" hint="Se a lista parar, ele cochila e chama você.">
           <Switch
-            label="Dino ocioso"
+            label="Fantasma ocioso"
             checked={prefs?.notifyDino ?? true}
             onCheckedChange={(v) => void patch({ notifyDino: v })}
           />
