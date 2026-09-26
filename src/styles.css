@@ -66,6 +66,8 @@ html[data-theme="dark"] {
   body,
   #app {
     min-height: 100%;
+    min-height: 100dvh;
+    background: var(--color-bg);
     touch-action: manipulation;
   }
 
@@ -91,11 +93,29 @@ html[data-theme="dark"] {
   }
 }
 
+.app-frame {
+  display: flex;
+  min-height: var(--app-h, 100dvh);
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
 .app-shell {
-  padding-top: max(1.75rem, env(safe-area-inset-top));
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: auto;
+  padding-top: max(6.75rem, calc(env(safe-area-inset-top) + 3.25rem));
   padding-right: max(1.25rem, env(safe-area-inset-right));
-  padding-bottom: calc(7.5rem + env(safe-area-inset-bottom));
+  padding-bottom: 1.25rem;
   padding-left: max(1.25rem, env(safe-area-inset-left));
+}
+
+@media (min-width: 768px) {
+  .app-shell {
+    padding-top: max(1.75rem, env(safe-area-inset-top));
+  }
 }
 
 .page-shell {

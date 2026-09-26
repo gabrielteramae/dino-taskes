@@ -660,8 +660,8 @@ function TaskBoard() {
   const firstName = displayName.trim().split(" ")[0];
 
   return (
-    <main className="relative min-h-dvh bg-bg text-fg">
-      <div className="app-shell mx-auto flex min-h-dvh w-full max-w-lg flex-col">
+    <main className="app-frame text-fg">
+      <div className="app-shell mx-auto w-full max-w-lg">
         <header className="mb-5 flex items-center justify-between gap-3">
           {tab === "tarefas" ? (
             <div className="min-w-0">
@@ -759,7 +759,7 @@ function TaskBoard() {
         {tab === "hoje" ? (
           <Agenda groups={agendaGroups()} ready={ready} />
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-1 flex-col gap-3">
             {ready && visible.length === 0 ? (
               <li className="rounded-xl border border-border bg-surface px-5 py-10 text-center">
                 <p className="text-sm text-muted">Nada por aqui</p>

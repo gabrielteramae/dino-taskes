@@ -12,7 +12,7 @@ const ITEMS: Array<{ id: DockTab; label: string; icon: LucideIcon }> = [
 
 export function DockNav({ tab, onChange }: { tab: DockTab; onChange: (tab: DockTab) => void }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] backdrop-blur-md">
+    <div className="sticky bottom-0 z-30 mt-auto shrink-0 border-t border-border bg-surface px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))]">
       <div className="mx-auto flex max-w-lg items-end gap-1">
         <nav aria-label="Seções" className="flex min-w-0 flex-1 items-center justify-around">
           {ITEMS.map((item) => {

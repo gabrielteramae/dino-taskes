@@ -57,6 +57,26 @@ function ThirdPartyFonts() {
   return null;
 }
 
+function ViewportFrame() {
+  useEffect(() => {
+    const apply = () => {
+      const view = window.visualViewport;
+      const height = Math.round(view?.height ?? window.innerHeight);
+      document.documentElement.style.setProperty("--app-h", `${height}px`);
+    };
+    apply();
+    window.visualViewport?.addEventListener("resize", apply);
+    window.visualViewport?.addEventListener("scroll", apply);
+    window.addEventListener("orientationchange", apply);
+    return () => {
+      window.visualViewport?.removeEventListener("resize", apply);
+      window.visualViewport?.removeEventListener("scroll", apply);
+      window.removeEventListener("orientationchange", apply);
+    };
+  }, []);
+  return null;
+}
+
 function ThemeSync() {
   useEffect(() => {
     applyTheme(readStoredTheme());
@@ -81,6 +101,7 @@ function Root() {
       </head>
       <body>
         <ThemeSync />
+        <ViewportFrame />
         <ThirdPartyFonts />
         <PreviewHostBridge />
         <AuthProvider>
