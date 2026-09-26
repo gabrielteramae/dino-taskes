@@ -49,8 +49,15 @@ function Termos() {
             cada conta fica separada.
           </p>
           <p>
-            O app pode mudar, pausar ou deixar de funcionar. Não há promessa de que ele ficará no ar o tempo todo nem
-            de que uma tarefa não se perca. Exporte a lista se quiser uma cópia sua.
+            Você pode parar de usar o app quando quiser e sair da conta. O autor pode suspender ou encerrar o acesso se
+            houver uso ilegal, abuso ou descumprimento destes termos. Sair ou ter o acesso encerrado não apaga sozinho
+            o que já está salvo: a lista continua até você apagá-la na tela Privacidade, ou até os dados serem
+            removidos.
+          </p>
+          <p>
+            O app é oferecido no estado em que está. Na medida permitida pela lei brasileira, Gabriel Teramae Chan não
+            responde por dano indireto, perda de tarefas, falha de conexão ou o app fora do ar. Nada nestes termos
+            tira direito que o Código de Defesa do Consumidor não permite afastar.
           </p>
           <p>Vale a legislação brasileira.</p>
         </Block>
@@ -77,8 +84,9 @@ function Termos() {
             para abrir a conta. O logo do Google é da Google e só indica esse login.
           </p>
           <p>
-            A sessão de login fica num cookie do navegador. A escolha de tema claro ou escuro fica neste aparelho. Não
-            há rastreador de anúncio.
+            A sessão de login fica num cookie necessário do navegador. Não há cookie de anúncio nem de medição. O aviso
+            na primeira visita guarda a sua escolha só neste aparelho: só o necessário, ou aceitar. A escolha de tema
+            claro ou escuro também fica neste aparelho, fora do cookie.
           </p>
           <p>
             Os dados ficam enquanto a conta existir. Na tela Privacidade, com a conta aberta, dá para baixar as tarefas
