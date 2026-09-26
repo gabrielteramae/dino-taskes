@@ -23,7 +23,7 @@ import { sendUserPush } from "@/lib/push";
 import { AccountMenu } from "@/components/account-menu";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/")({ component: Home });
+const CATEGORY_LABEL = { trabalho: "Trabalho", casa: "Casa", estudo: "Estudo" } as const;
 
 const EMOJI_RULES: Array<{ keys: string[]; emoji: string }> = [
   { keys: ["cafe", "coffee"], emoji: "☕" },
@@ -182,11 +182,13 @@ function Agenda({
 
       <section>
         <h2 className="mb-1 text-sm font-medium text-fg">
-          {new Date(`${selected}T12:00:00`).toLocaleDateString("pt-BR", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-          })}
+          {selected === todayKey
+            ? "Tarefas de hoje"
+            : new Date(`${selected}T12:00:00`).toLocaleDateString("pt-BR", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })}
         </h2>
         <p className="mb-3 text-xs text-subtle">O dia se escolhe na lista, não aqui.</p>
         {selectedTasks.length === 0 ? (
@@ -210,6 +212,8 @@ function Agenda({
   );
 }
 
+export const Route = createFileRoute("/")({ component: Home });
+
 function Home() {
   const { user, isPending } = useCurrentUserState();
   if (isPending) {
@@ -227,6 +231,10 @@ function TaskBoard() {
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [ready, setReady] = useState(false);
   const [draft, setDraft] = useState("");
+  const [query, setQuery] = useState("");
+  const [listFilter, setListFilter] = useState<"todas" | "hoje" | "sem-dia">("todas");
+  const [newCategory, setNewCategory] = useState<TaskRow["category"]>("estudo");
+  const [displayName, setDisplayName] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [notifyOnDone, setNotifyOnDone] = useState(true);
   const [tab, setTab] = useState<DockTab>("tarefas");
@@ -270,6 +278,7 @@ function TaskBoard() {
       .then((p) => {
         if (cancelled) return;
         setConfirmDelete(p.confirmDelete);
+        setDisplayName(p.displayName);
         setNotifyOnDone(p.notifyDone);
         remind = p.notifyDino;
         ping();
@@ -294,7 +303,7 @@ function TaskBoard() {
       id,
       text,
       done: false,
-      category: "estudo",
+      category: newCategory,
       priority: "normal",
       dueAt: null,
       sortOrder: (tasksRef.current[0]?.sortOrder ?? 0) - 1,
@@ -306,7 +315,7 @@ function TaskBoard() {
       if (!local) return;
       try {
         await addTask({
-          data: { id, text: local.text, dueAt: local.dueAt, sortOrder: local.sortOrder },
+          data: { id, text: local.text, category: local.category, dueAt: local.dueAt, sortOrder: local.sortOrder },
         });
       } catch (err) {
         if (isUnauthorized(err)) return;
@@ -374,7 +383,11 @@ function TaskBoard() {
 
   const visible = tasks.filter((task) => {
     if (tab === "feitas") return task.done;
-    return !task.done;
+    if (task.done) return false;
+    if (query.trim() && !task.text.toLowerCase().includes(query.trim().toLowerCase())) return false;
+    if (listFilter === "hoje") return isSameDay(task.dueAt);
+    if (listFilter === "sem-dia") return !task.dueAt;
+    return true;
   });
 
   const persistOrder = async (ids: string[]) => {
@@ -412,7 +425,8 @@ function TaskBoard() {
         key={task.id}
         data-task-id={task.id}
         className={cn(
-          "flex items-center gap-3 rounded-2xl bg-surface px-3 py-3 shadow-[0_8px_24px_rgba(60,40,20,0.05)]",
+          "flex items-center gap-3 rounded-2xl border-l-4 bg-surface px-3 py-3 shadow-[0_8px_24px_rgba(60,40,20,0.05)]",
+          task.priority === "urgente" ? "border-danger" : task.priority === "depois" ? "border-accent" : "border-[#e4b423]",
           dragId === task.id && "opacity-40",
         )}
       >
@@ -474,13 +488,18 @@ function TaskBoard() {
         </button>
         <span className="min-w-0 flex-1">
           <span className={cn("block text-[15px] leading-snug", task.done && "text-subtle line-through")}>
-            {emojiForTask(task.text)} {task.text}
+            {task.text}
           </span>
-          {dueLabel ? (
-            <span className={cn("mt-0.5 block text-xs", overdue ? "text-danger" : "text-subtle")}>{dueLabel}</span>
-          ) : tab === "tarefas" ? (
-            <span className="mt-0.5 block text-xs text-subtle">Sem dia</span>
-          ) : null}
+          <span className="mt-1 flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] text-muted">
+              {CATEGORY_LABEL[task.category]}
+            </span>
+            {dueLabel ? (
+              <span className={cn("text-xs", overdue ? "text-danger" : "text-subtle")}>{dueLabel}</span>
+            ) : tab === "tarefas" ? (
+              <span className="text-xs text-subtle">Sem dia</span>
+            ) : null}
+          </span>
           {tab === "tarefas" && !task.done ? (
             <label className="mt-2 flex items-center gap-2 text-xs text-subtle">
               Dia
@@ -554,31 +573,25 @@ function TaskBoard() {
   };
 
   const today = new Date();
-  const doneCount = tasks.filter((task) => task.done).length;
-  const progress = tasks.length ? doneCount / tasks.length : 0;
+  const openCount = tasks.filter((task) => !task.done).length;
+  const hour = today.getHours();
+  const hello = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const firstName = displayName.trim().split(" ")[0];
 
   return (
     <main className="relative min-h-dvh bg-bg text-fg">
       <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col px-5 pt-8 pb-36">
         <header className="mb-5 flex items-center justify-between gap-3">
           {tab === "tarefas" ? (
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-surface text-lg font-medium shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
-                {today.getDate()}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium capitalize">
-                  {today.toLocaleDateString("pt-BR", { weekday: "long" })}
-                </p>
-                <p className="text-xs text-muted capitalize">
-                  {today.toLocaleDateString("pt-BR", { month: "long" })}
-                  {ready ? ` · ${doneCount} de ${tasks.length}` : ""}
-                  {streak > 0 ? ` · ${streak} dia${streak === 1 ? "" : "s"}` : ""}
-                </p>
-                <div className="mt-2 h-1 w-28 overflow-hidden rounded-full bg-surface-2">
-                  <div className="h-full rounded-full bg-accent" style={{ width: `${progress * 100}%` }} />
-                </div>
-              </div>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {hello}
+                {firstName ? `, ${firstName}` : ""}
+              </h1>
+              <p className="mt-1 text-sm text-muted">
+                {ready ? `${openCount} para fazer` : "Carregando…"}
+                {streak > 0 ? ` · ${streak} dia${streak === 1 ? "" : "s"}` : ""}
+              </p>
             </div>
           ) : (
             <div>
@@ -614,7 +627,77 @@ function TaskBoard() {
                 <Plus className="size-5" strokeWidth={2} />
               </Button>
             </div>
+            <div className="flex gap-2">
+              {(
+                [
+                  ["trabalho", "Trabalho"],
+                  ["casa", "Casa"],
+                  ["estudo", "Estudo"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setNewCategory(value)}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-xs",
+                    newCategory === value ? "bg-accent text-accent-fg" : "bg-surface text-muted",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </form>
+        ) : null}
+
+        {tab === "tarefas" ? (
+          <div className="mb-4 flex flex-col gap-3">
+            <Input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Buscar tarefa"
+              aria-label="Buscar tarefa"
+            />
+            <div className="flex gap-2">
+              {(
+                [
+                  ["todas", "Todas"],
+                  ["hoje", "Hoje"],
+                  ["sem-dia", "Sem dia"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setListFilter(value)}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-xs",
+                    listFilter === value ? "bg-fg text-bg" : "bg-surface text-muted",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {tab === "feitas" ? (
+          <div className="mb-4 grid grid-cols-3 gap-2">
+            {(
+              [
+                ["Feitas", String(tasks.filter((task) => task.done).length)],
+                ["Seguidos", String(streak)],
+                ["Taxa", tasks.length ? `${Math.round((tasks.filter((task) => task.done).length / tasks.length) * 100)}%` : "0%"],
+              ] as const
+            ).map(([label, value]) => (
+              <div key={label} className="rounded-2xl bg-surface px-3 py-3 shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
+                <p className="text-lg font-semibold">{value}</p>
+                <p className="text-[11px] text-subtle">{label}</p>
+              </div>
+            ))}
+          </div>
         ) : null}
 
         {tab === "hoje" ? (
