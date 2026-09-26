@@ -18,6 +18,7 @@ import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as OauthRouteImport } from './routes/oauth'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -65,6 +66,11 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
   path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/oauth': typeof OauthRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/oauth': typeof OauthRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/oauth': typeof OauthRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/oauth'
     | '/perfil'
     | '/privacidade'
+    | '/termos'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/oauth'
     | '/perfil'
     | '/privacidade'
+    | '/termos'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/oauth'
     | '/perfil'
     | '/privacidade'
+    | '/termos'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -157,6 +169,7 @@ export interface RootRouteChildren {
   OauthRoute: typeof OauthRoute
   PerfilRoute: typeof PerfilRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  TermosRoute: typeof TermosRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -245,6 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   OauthRoute: OauthRoute,
   PerfilRoute: PerfilRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  TermosRoute: TermosRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

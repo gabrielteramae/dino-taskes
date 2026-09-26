@@ -38,7 +38,7 @@ O front e as funções de servidor vivem no mesmo app. Sem `DATABASE_URL`, o ban
 | Tarefas | Escrever, concluir, apagar e reordenar |
 | Agenda | Ver o que foi criado e escolher o dia de cada uma |
 | Feitas | Lista do que já foi riscado |
-| Conta | Perfil, dados salvos, contas, configurações, privacidade, notificações, ajuda e sair |
+| Conta | Perfil, dados salvos, contas, configurações, privacidade, notificações, ajuda, termos e sair |
 
 Dá para arrastar as tarefas para mudar a ordem.
 

@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
@@ -174,7 +174,18 @@ function Login() {
               </button>
             </p>
             <p className="mt-8 text-center text-[11px] leading-relaxed text-subtle">
-              © 2026 Gabriel Teramae Chan. Todos os direitos reservados.
+              <Link to="/termos" className="hover:text-fg">
+                Termos
+              </Link>
+              {" · "}
+              <Link to="/termos" hash="privacidade" className="hover:text-fg">
+                Privacidade
+              </Link>
+              {" · "}
+              <Link to="/termos" hash="direitos" className="hover:text-fg">
+                Direitos
+              </Link>
+              <span className="mt-2 block">© 2026 Gabriel Teramae Chan. Todos os direitos reservados.</span>
             </p>
           </>
         )}

@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import {
   Bell,
   CircleHelp,
+  FileText,
   ChevronRight,
   Database,
   Link2,
@@ -25,6 +26,7 @@ const ITEMS = [
   { to: "/privacidade", label: "Privacidade", icon: Shield },
   { to: "/notificacoes", label: "Notificações", icon: Bell },
   { to: "/ajuda", label: "Ajuda", icon: CircleHelp },
+  { to: "/termos", label: "Termos e direitos", icon: FileText },
 ] as const;
 
 export function AccountMenu() {

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthScreen, SettingGroup, SettingRow } from "@/components/auth-screen";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,11 @@ function Privacidade() {
         </Button>
       </div>
       {status ? <p className="mt-3 text-center text-xs text-muted">{status}</p> : null}
+      <p className="mt-6 text-center text-sm text-muted">
+        <Link to="/termos" hash="privacidade" className="font-medium text-accent hover:underline">
+          Ler a política de privacidade
+        </Link>
+      </p>
     </AuthScreen>
   );
 }
