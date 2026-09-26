@@ -8,6 +8,7 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { listCookies, type CookieKind } from "@/lib/cookies";
 import { CONSENT_OFF, type Consent } from "@/lib/consent";
 import { clearStoredKind, listLocalStorage, type StorageKind } from "@/lib/storage";
+import { deleteMyAccount } from "@/lib/account";
 import { deleteAllTasks, exportMyData } from "@/lib/tasks";
 
 export const Route = createFileRoute("/privacidade")({ component: Privacidade });
@@ -46,8 +47,31 @@ function Privacidade() {
     }
   };
 
+  const eraseAccount = async () => {
+    if (
+      !window.confirm(
+        "Excluir a conta e os dados vinculados? Serão apagados e-mail, nome, senha, tarefas, preferências, avisos e sessão. Esta operação é irreversível.",
+      )
+    ) {
+      return;
+    }
+    setBusy(true);
+    setStatus("");
+    try {
+      await deleteMyAccount();
+      try {
+        await signOut("/login");
+      } catch {
+        window.location.href = "/login";
+      }
+    } catch {
+      setStatus("Não foi possível excluir a conta.");
+      setBusy(false);
+    }
+  };
+
   const wipe = async () => {
-    if (!window.confirm("Apagar todas as suas tarefas? Isso não tem volta.")) return;
+    if (!window.confirm("Excluir todas as tarefas desta conta? A operação não remove o e-mail nem a senha.")) return;
     setBusy(true);
     setStatus("");
     try {
@@ -231,7 +255,10 @@ function Privacidade() {
           Exportar minhas tarefas
         </Button>
         <Button variant="danger" className="w-full border border-border" disabled={busy} onClick={() => void wipe()}>
-          Apagar todas as tarefas
+          Excluir somente a lista
+        </Button>
+        <Button variant="danger" className="w-full border border-border" disabled={busy} onClick={() => void eraseAccount()}>
+          Excluir conta e dados
         </Button>
       </div>
       {status ? <p className="mt-3 text-center text-xs text-muted">{status}</p> : null}

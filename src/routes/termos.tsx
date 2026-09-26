@@ -106,11 +106,33 @@ function Termos() {
             Recurso de terceiro, quando permitido, limita-se ao carregamento da fonte tipográfica.
           </p>
           <p>
-            Os dados permanecem enquanto a conta existir. Na tela Privacidade, com sessão ativa, o titular pode exportar
-            as tarefas em JSON, o que atende à portabilidade, ou excluir a lista. Nome e e-mail são alteráveis no
-            Perfil. A exclusão da lista não remove o correio eletrônico da conta. A exclusão integral da conta, nos
-            termos da diretriz 5.1.1 (v), opera pelo encerramento da sessão e pela solicitação ao controlador, sem
-            prejuízo dos direitos de acesso, correção e informação previstos na LGPD.
+            Os dados permanecem pelo tempo necessário às finalidades informadas, em regra enquanto a conta existir.
+            Bases legais, nos termos do art. 7º da LGPD: execução de contrato para conta, lista e sessão necessária
+            (inciso V); consentimento para preferências, avisos e recurso de terceiro (inciso I). O tratamento observa
+            os princípios do art. 6º, em especial finalidade, necessidade, transparência e segurança.
+          </p>
+          <p>
+            Direitos do titular, art. 18 da LGPD: confirmação e acesso, correção, anonimização, bloqueio ou eliminação
+            de dado desnecessário ou tratado em desconformidade, portabilidade, informação sobre compartilhamento e
+            revogação do consentimento. O prazo de resposta segue o art. 19. A autoridade nacional é a ANPD. O
+            aplicativo não se destina a criança, art. 14.
+          </p>
+          <p>Exclusão, de forma iniciada no próprio aplicativo, em atendimento à diretriz 5.1.1 (v) da App Store:</p>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>Exportação: a tela Privacidade gera arquivo JSON das tarefas, para portabilidade.</li>
+            <li>Exclusão da lista: remove somente as tarefas. Permanecem conta, e-mail, nome e credencial.</li>
+            <li>
+              Exclusão da conta e dos dados: remove, de forma irreversível, usuário, credencial, sessões, tarefas,
+              preferências, sequência, inscrições de aviso e verificações associadas ao e-mail. Em seguida a sessão
+              local é encerrada.
+            </li>
+            <li>Revogação de consentimento: as categorias opcionais podem ser desligadas na mesma tela, sem apagar a conta.</li>
+          </ul>
+          <p>
+            Se a infraestrutura de hospedagem estiver fora do Brasil, a transferência internacional limita-se à
+            prestação do serviço e observa o art. 33 da LGPD. Não há venda de dados nem compartilhamento para
+            publicidade. Registro de conexão não é conservado além da sessão. Medidas do art. 46 incluem senha em hash,
+            cookie de sessão inacessível a script e consultas restritas ao identificador autenticado.
           </p>
         </Block>
 
