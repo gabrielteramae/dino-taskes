@@ -544,33 +544,31 @@ function TaskBoard() {
   return (
     <main className="relative min-h-dvh bg-bg text-fg">
       <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col px-5 pt-8 pb-36">
-        <header className="mb-5 flex items-start justify-between gap-3">
-          <div>
-            {tab === "tarefas" ? (
-              <>
-                <p className="text-6xl leading-none font-light tracking-tight">{today.getDate()}</p>
-                <p className="mt-2 text-sm text-muted capitalize">
-                  {today.toLocaleDateString("pt-BR", { weekday: "long", month: "long" })}
+        <header className="mb-5 flex items-center justify-between gap-3">
+          {tab === "tarefas" ? (
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-surface text-lg font-medium shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
+                {today.getDate()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium capitalize">
+                  {today.toLocaleDateString("pt-BR", { weekday: "long" })}
                 </p>
-              </>
-            ) : (
-              <h1 className="pt-2 text-3xl font-semibold tracking-tight">{titles[tab]}</h1>
-            )}
-          </div>
+                <p className="text-xs text-muted capitalize">
+                  {today.toLocaleDateString("pt-BR", { month: "long" })}
+                  {ready ? ` · ${doneCount} de ${tasks.length}` : ""}
+                  {streak > 0 ? ` · ${streak} dia${streak === 1 ? "" : "s"}` : ""}
+                </p>
+                <div className="mt-2 h-1 w-28 overflow-hidden rounded-full bg-surface-2">
+                  <div className="h-full rounded-full bg-accent" style={{ width: `${progress * 100}%` }} />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <h1 className="text-2xl font-semibold tracking-tight">{titles[tab]}</h1>
+          )}
           <AccountMenu />
         </header>
-
-        {tab === "tarefas" ? (
-          <>
-            <div className="mb-2 h-1 overflow-hidden rounded-full bg-surface-2">
-              <div className="h-full rounded-full bg-accent" style={{ width: `${progress * 100}%` }} />
-            </div>
-            <p className="mb-4 text-xs text-subtle">
-              {ready ? `${doneCount} de ${tasks.length} tarefas` : "Carregando…"}
-              {streak > 0 ? ` · ${streak} dia${streak === 1 ? "" : "s"}` : ""}
-            </p>
-          </>
-        ) : null}
 
         {tab === "tarefas" ? (
           <form
