@@ -1,5 +1,4 @@
 import { THEME_STORAGE_KEY } from "@/lib/theme";
-import { LOCATION_KEY } from "@/lib/location";
 
 export const CONSENT_STORAGE_KEY = "cookie-banner";
 
@@ -7,7 +6,7 @@ export type StorageKind = "consent" | "preferences" | "session" | "other";
 
 export function storageKind(key: string): StorageKind {
   if (key === CONSENT_STORAGE_KEY) return "consent";
-  if (key === THEME_STORAGE_KEY || key === LOCATION_KEY) return "preferences";
+  if (key === THEME_STORAGE_KEY) return "preferences";
   if (key === "grok-auth.bearer-token") return "session";
   return "other";
 }
