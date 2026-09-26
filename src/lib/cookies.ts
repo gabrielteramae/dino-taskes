@@ -1,7 +1,5 @@
 export type CookieKind = "essential" | "optional";
 
-export type ConsentChoice = "essential" | "all";
-
 export const CHOICE_COOKIE = "cookie_choice";
 
 export function isEssentialCookie(name: string) {
@@ -46,17 +44,10 @@ export function listCookies(): Array<{ name: string; kind: CookieKind }> {
   return [...seen.entries()].map(([name, kind]) => ({ name, kind }));
 }
 
-/** Keep the session cookies. Drop every other cookie the page is allowed to see. */
-export function applyCookieChoice(choice: ConsentChoice) {
-  writeCookie(CHOICE_COOKIE, choice, 60 * 60 * 24 * 180);
-  if (choice === "essential") {
-    for (const cookie of listCookies()) {
-      if (cookie.kind === "optional") deleteCookie(cookie.name);
-    }
+/** Keep the session cookies. When optional categories are off, drop the rest. */
+export function applyCookieChoice(allowOptional: boolean) {
+  if (allowOptional) return;
+  for (const cookie of listCookies()) {
+    if (cookie.kind === "optional") deleteCookie(cookie.name);
   }
-}
-
-export function readCookieChoice(): ConsentChoice | "" {
-  const value = readCookie(CHOICE_COOKIE);
-  return value === "all" || value === "essential" ? value : "";
 }

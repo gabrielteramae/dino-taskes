@@ -1,27 +1,22 @@
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Link } from "@tanstack/react-router";
-import { applyCookieChoice, readCookieChoice, type ConsentChoice } from "@/lib/cookies";
+import { Switch } from "@/components/ui/switch";
+import {
+  CONSENT_OFF,
+  CONSENT_ON,
+  consentLabel,
+  readSavedConsent,
+  saveConsent,
+  type Consent,
+} from "@/lib/consent";
 
-const KEY = "cookie-banner";
+export { consentLabel, saveConsent };
 
-export type { ConsentChoice };
-
-let choice: ConsentChoice | "" | null = null;
+let choice: Consent | null | undefined;
 const listeners = new Set<() => void>();
 
 function emit() {
   for (const listener of listeners) listener();
-}
-
-function readStored(): ConsentChoice | "" {
-  const fromCookie = readCookieChoice();
-  if (fromCookie) return fromCookie;
-  try {
-    const value = localStorage.getItem(KEY);
-    return value === "all" || value === "essential" ? value : "";
-  } catch {
-    return "";
-  }
 }
 
 function subscribe(listener: () => void) {
@@ -34,48 +29,76 @@ function snapshot() {
 }
 
 export function useConsentChoice() {
-  return useSyncExternalStore(subscribe, snapshot, () => null);
+  return useSyncExternalStore(subscribe, snapshot, () => undefined);
 }
 
-export function consentLabel(value: ConsentChoice | "" | null) {
-  if (value === "all") return "Cookies aceitos.";
-  if (value === "essential") return "Só o cookie necessário para entrar.";
-  return "Ainda sem escolha.";
+export function reopenConsent() {
+  choice = null;
+  emit();
 }
 
-export function saveConsent(value: ConsentChoice) {
-  applyCookieChoice(value);
-  try {
-    localStorage.setItem(KEY, value);
-  } catch {
-    /* ignore */
-  }
+export function commitConsent(value: Consent) {
+  saveConsent(value);
   choice = value;
   emit();
 }
 
-export function reopenConsent() {
-  try {
-    localStorage.removeItem(KEY);
-  } catch {
-    /* ignore */
-  }
-  choice = "";
-  emit();
+function publish(value: Consent) {
+  commitConsent(value);
+}
+
+const CATEGORIES: Array<{ key: keyof Consent; title: string; hint: string }> = [
+  { key: "preferences", title: "Preferências", hint: "Tema claro ou escuro neste aparelho." },
+  { key: "analytics", title: "Análise", hint: "Não usamos hoje." },
+  { key: "marketing", title: "Marketing", hint: "Não usamos hoje." },
+];
+
+export function ConsentSwitches({
+  value,
+  onChange,
+}: {
+  value: Consent;
+  onChange: (next: Consent) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm text-fg">Necessários</p>
+          <p className="text-xs text-subtle">Login. Sempre ligados.</p>
+        </div>
+        <Switch label="Necessários" checked disabled onCheckedChange={() => undefined} />
+      </div>
+      {CATEGORIES.map((item) => (
+        <div key={item.key} className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm text-fg">{item.title}</p>
+            <p className="text-xs text-subtle">{item.hint}</p>
+          </div>
+          <Switch
+            label={item.title}
+            checked={value[item.key]}
+            onCheckedChange={(checked) => onChange({ ...value, [item.key]: checked })}
+          />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function CookieConsent() {
-  const current = useSyncExternalStore(subscribe, snapshot, () => null);
+  const current = useSyncExternalStore(subscribe, snapshot, () => undefined);
+  const [draft, setDraft] = useState<Consent>(CONSENT_OFF);
 
   useEffect(() => {
-    if (choice !== null) return;
-    const stored = readStored();
+    if (choice !== undefined) return;
+    const stored = readSavedConsent();
     choice = stored;
-    if (stored) applyCookieChoice(stored);
+    if (stored) saveConsent(stored);
     emit();
   }, []);
 
-  if (current !== "") return null;
+  if (current !== null) return null;
 
   return (
     <div
@@ -87,28 +110,35 @@ export function CookieConsent() {
         Cookies
       </p>
       <p className="mt-1 text-sm leading-relaxed text-muted">
-        Um cookie de sessão mantém o login. Não usamos cookie de anúncio.{" "}
+        Escolha o que pode ficar neste aparelho.{" "}
         <Link to="/termos" hash="privacidade" className="font-medium text-accent hover:underline">
           Política de privacidade
         </Link>
       </p>
-      <p className="mt-3 rounded-lg bg-surface-2 px-3 py-2 text-xs text-muted">
-        Necessário: sessão da conta. Opcional: nenhum.
-      </p>
+      <div className="mt-3">
+        <ConsentSwitches value={draft} onChange={setDraft} />
+      </div>
       <div className="mt-3 flex gap-2">
         <button
           type="button"
-          onClick={() => saveConsent("essential")}
+          onClick={() => publish(CONSENT_OFF)}
           className="h-10 flex-1 rounded-lg border border-border text-sm text-fg"
         >
-          Recusar opcionais
+          Só o necessário
         </button>
         <button
           type="button"
-          onClick={() => saveConsent("all")}
+          onClick={() => publish(draft)}
+          className="h-10 flex-1 rounded-lg border border-border text-sm text-fg"
+        >
+          Salvar
+        </button>
+        <button
+          type="button"
+          onClick={() => publish(CONSENT_ON)}
           className="h-10 flex-1 rounded-lg bg-accent text-sm font-medium text-accent-fg"
         >
-          Aceitar
+          Aceitar tudo
         </button>
       </div>
     </div>

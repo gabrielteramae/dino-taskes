@@ -4,18 +4,20 @@ type Props = {
   checked: boolean;
   onCheckedChange: (next: boolean) => void;
   label: string;
+  disabled?: boolean;
 };
 
-export function Switch({ checked, onCheckedChange, label }: Props) {
+export function Switch({ checked, onCheckedChange, label, disabled = false }: Props) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
       aria-label={label}
+      disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        "relative h-7 w-11 shrink-0 rounded-full transition-colors duration-300 ease-out",
+        "relative h-7 w-11 shrink-0 rounded-full transition-colors duration-300 ease-out disabled:opacity-50",
         checked ? "bg-accent" : "bg-subtle/70",
       )}
     >

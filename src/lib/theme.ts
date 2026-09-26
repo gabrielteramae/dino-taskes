@@ -1,6 +1,6 @@
 export type ThemeMode = "dark" | "light";
 
-const KEY = "dino-theme";
+export const THEME_STORAGE_KEY = "dino-theme";
 
 export function isThemeMode(value: unknown): value is ThemeMode {
   return value === "dark" || value === "light";
@@ -9,9 +9,20 @@ export function isThemeMode(value: unknown): value is ThemeMode {
 export function readStoredTheme(): ThemeMode {
   if (typeof window === "undefined") return "dark";
   try {
-    return localStorage.getItem(KEY) === "light" ? "light" : "dark";
+    return localStorage.getItem(THEME_STORAGE_KEY) === "light" ? "light" : "dark";
   } catch {
     return "dark";
+  }
+}
+
+function persistThemeAllowed() {
+  try {
+    const raw = localStorage.getItem("cookie-banner");
+    if (raw === "essential") return false;
+    if (!raw || raw === "all") return true;
+    return JSON.parse(raw).preferences !== false;
+  } catch {
+    return true;
   }
 }
 
@@ -28,7 +39,7 @@ export function applyTheme(theme: ThemeMode) {
   root.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
   try {
-    localStorage.setItem(KEY, theme);
+    if (persistThemeAllowed()) localStorage.setItem(THEME_STORAGE_KEY, theme);
   } catch {
     /* ignore */
   }

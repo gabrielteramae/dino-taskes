@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AuthScreen, SettingGroup, SettingRow } from "@/components/auth-screen";
-import { consentLabel, saveConsent, useConsentChoice } from "@/components/cookie-consent";
+import { consentLabel, commitConsent, ConsentSwitches, useConsentChoice } from "@/components/cookie-consent";
 import { Button } from "@/components/ui/button";
 import { listCookies, type CookieKind } from "@/lib/cookies";
+import { CONSENT_OFF, type Consent } from "@/lib/consent";
+import { clearStoredKind, listLocalStorage, type StorageKind } from "@/lib/storage";
 import { deleteAllTasks, exportMyData } from "@/lib/tasks";
 
 export const Route = createFileRoute("/privacidade")({ component: Privacidade });
@@ -12,10 +14,13 @@ function Privacidade() {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [cookies, setCookies] = useState<Array<{ name: string; kind: CookieKind }>>([]);
+  const [stored, setStored] = useState<Array<{ key: string; kind: StorageKind }>>([]);
   const consent = useConsentChoice();
+  const current = consent ?? CONSENT_OFF;
 
   useEffect(() => {
     setCookies(listCookies());
+    setStored(listLocalStorage());
   }, [consent]);
 
   const exportData = async () => {
@@ -80,13 +85,24 @@ function Privacidade() {
           ))
         )}
       </ul>
+      <div className="mt-3 rounded-xl border border-border bg-surface px-4 py-3">
+        <ConsentSwitches
+          value={current}
+          onChange={(next: Consent) => {
+            commitConsent(next);
+            setCookies(listCookies());
+            setStored(listLocalStorage());
+          }}
+        />
+      </div>
       <div className="mt-3 flex gap-2">
         <Button
           variant="ghost"
           className="flex-1 border border-border"
           onClick={() => {
-            saveConsent("essential");
+            commitConsent(CONSENT_OFF);
             setCookies(listCookies());
+            setStored(listLocalStorage());
           }}
         >
           Só o necessário
@@ -94,11 +110,51 @@ function Privacidade() {
         <Button
           className="flex-1"
           onClick={() => {
-            saveConsent("all");
+            commitConsent({ preferences: true, analytics: true, marketing: true });
             setCookies(listCookies());
+            setStored(listLocalStorage());
           }}
         >
-          Aceitar
+          Aceitar tudo
+        </Button>
+      </div>
+
+      <p className="mt-6 mb-2 text-sm text-fg">LocalStorage</p>
+      <ul className="overflow-hidden rounded-xl border border-border bg-surface">
+        {stored.length === 0 ? (
+          <li className="px-4 py-3 text-xs text-subtle">Nada guardado neste aparelho.</li>
+        ) : (
+          stored.map((item) => (
+            <li key={item.key} className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 text-sm last:border-0">
+              <span className="min-w-0 truncate text-fg">{item.key}</span>
+              <span className="shrink-0 text-xs text-subtle">
+                {item.kind === "consent" ? "Consentimento" : item.kind === "preferences" ? "Preferência" : "Outro"}
+              </span>
+            </li>
+          ))
+        )}
+      </ul>
+      <div className="mt-3 flex gap-2">
+        <Button
+          variant="ghost"
+          className="flex-1 border border-border"
+          onClick={() => {
+            clearStoredKind("preferences");
+            commitConsent({ ...current, preferences: false });
+            setStored(listLocalStorage());
+          }}
+        >
+          Limpar preferências
+        </Button>
+        <Button
+          variant="ghost"
+          className="flex-1 border border-border"
+          onClick={() => {
+            clearStoredKind("other");
+            setStored(listLocalStorage());
+          }}
+        >
+          Limpar outros
         </Button>
       </div>
 

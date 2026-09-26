@@ -84,9 +84,7 @@ function Termos() {
             para abrir a conta. O logo do Google é da Google e só indica esse login.
           </p>
           <p>
-            A sessão de login fica num cookie necessário do navegador. Não há cookie de anúncio nem de medição. O aviso
-            na primeira visita guarda a sua escolha só neste aparelho: só o necessário, ou aceitar. A escolha de tema
-            claro ou escuro também fica neste aparelho, fora do cookie.
+            A sessão de login fica num cookie necessário do navegador. Preferências, análise e marketing são escolhas separadas. Análise e marketing não são usados hoje. O tema claro ou escuro só fica neste aparelho se você permitir preferências.
           </p>
           <p>
             Os dados ficam enquanto a conta existir. Na tela Privacidade, com a conta aberta, dá para baixar as tarefas
