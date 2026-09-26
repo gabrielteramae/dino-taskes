@@ -63,13 +63,14 @@ function Privacidade() {
   return (
     <AuthScreen title="Privacidade">
       <p className="mb-4 text-sm text-muted">
-        Suas tarefas são só suas. Ninguém mais lê, altera ou lista o que você escreve.
+        Os registros da lista são vinculados exclusivamente à conta autenticada. Terceiros não leem, alteram nem
+        enumeram o conteúdo.
       </p>
       <SettingGroup>
-        <SettingRow title="Dados guardados" hint="E-mail da conta, nome e tarefas. Senha nunca fica visível." />
-        <SettingRow title="Acesso" hint="Cada pedido no servidor usa a sua sessão. Sem ID enviado pelo aparelho." />
-        <SettingRow title="Sem rastreio extra" hint="Não vendemos dados e não tem feed público." />
-        <SettingRow title="Dados móveis" hint="Só sai o que você faz: entrar, salvar a tarefa e, se ligar, o aviso." />
+        <SettingRow title="Dados tratados" hint="Correio eletrônico, nome e tarefas. A senha permanece apenas como hash." />
+        <SettingRow title="Acesso" hint="Cada requisição é autorizada pela sessão. O cliente não envia identificador arbitrário." />
+        <SettingRow title="Finalidade" hint="Não há venda de dados nem rastreamento publicitário." />
+        <SettingRow title="Dados móveis" hint="O tráfego limita-se a autenticação, gravação da lista e aviso, se habilitado." />
         <SettingRow title="Cookies neste aparelho" hint={consentLabel(consent)} />
       </SettingGroup>
 

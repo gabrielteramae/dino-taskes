@@ -34,95 +34,108 @@ function Termos() {
       <div className="mt-8 flex flex-col gap-8">
         <Block id="uso" title="Termos de uso">
           <p>
-            Este app é uma lista pessoal de tarefas. Ao criar uma conta ou entrar, você concorda com estes termos, com a
-            política de privacidade e com os direitos descritos abaixo.
+            O presente aplicativo consiste em uma lista pessoal de tarefas. A criação de conta ou o início de sessão
+            implica a aceitação destes termos, da política de privacidade e das disposições de direitos autorais.
           </p>
           <p>
-            A conta é sua. O acesso é por e-mail e senha ou pelo Google. Você é responsável por guardar o acesso e por
-            tudo o que escrever na lista.
+            A conta é individual. A autenticação ocorre por correio eletrônico e senha ou por provedor Google. O
+            titular responde pela guarda das credenciais e pelo conteúdo inserido na lista.
           </p>
           <p>
-            O texto das tarefas é seu. O app só guarda esse texto para mostrar a lista para você, na sua conta.
+            O texto das tarefas permanece de titularidade do usuário. O aplicativo o armazena exclusivamente para
+            exibir a lista na conta correspondente.
           </p>
           <p>
-            Não use o app para conteúdo ilegal, para invadir conta alheia ou para prejudicar outra pessoa. A lista de
-            cada conta fica separada.
+            É vedado o uso para conteúdo ilícito, acesso não autorizado a conta de terceiro ou prejuízo a outra pessoa.
+            Os registros de cada conta são isolados.
           </p>
           <p>
-            Você pode parar de usar o app quando quiser e sair da conta. O autor pode suspender ou encerrar o acesso se
-            houver uso ilegal, abuso ou descumprimento destes termos. Sair ou ter o acesso encerrado não apaga sozinho
-            o que já está salvo: a lista continua até você apagá-la na tela Privacidade, ou até os dados serem
-            removidos.
+            O uso pode ser interrompido a qualquer momento, mediante encerramento da sessão. O titular dos direitos do
+            aplicativo pode suspender ou encerrar o acesso em caso de uso ilícito, abuso ou descumprimento destes
+            termos. O encerramento da sessão ou do acesso não elimina, por si, os dados já gravados: a lista permanece
+            até exclusão na tela Privacidade ou até a remoção dos registros.
           </p>
           <p>
-            O app é oferecido no estado em que está. Na medida permitida pela lei brasileira, Gabriel Teramae Chan não
-            responde por dano indireto, perda de tarefas, falha de conexão ou o app fora do ar. Nada nestes termos
-            tira direito que o Código de Defesa do Consumidor não permite afastar.
+            O aplicativo é fornecido no estado em que se encontra. Na extensão permitida pela legislação brasileira,
+            Gabriel Teramae Chan não responde por dano indireto, perda de tarefas, falha de conexão ou indisponibilidade.
+            Nenhuma cláusula afasta direito irrenunciável do Código de Defesa do Consumidor.
           </p>
-          <p>Vale a legislação brasileira.</p>
+          <p>Aplica-se a legislação brasileira.</p>
         </Block>
 
         <Block id="privacidade" title="Política de privacidade">
           <p>
-            O responsável pelos dados é Gabriel Teramae Chan. Esta política vale para a conta e para a lista deste app,
-            nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018).
+            O controlador dos dados pessoais é Gabriel Teramae Chan. Esta política rege o tratamento da conta e da lista
+            deste aplicativo, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).
           </p>
-          <p>Dados usados para a conta e a lista funcionar:</p>
+          <p>
+            Na hipótese de distribuição pela Apple App Store, o tratamento também observa a diretriz 5.1 (Privacy) das
+            App Store Review Guidelines. Em especial: a política deve identificar quais dados são coletados, por qual
+            meio e para qual finalidade, e permanecer acessível no próprio aplicativo (item 5.1.1, i); o uso e o
+            compartilhamento limitam-se ao que esta política declara (item 5.1.2); não há rastreamento entre aplicativos
+            ou sites de terceiros, de modo que não se aplica o quadro App Tracking Transparency; e, havendo criação de
+            conta, a diretriz 5.1.1 (v) exige meio de exclusão da conta, descrito abaixo.
+          </p>
+          <p>
+            Categorias tratadas, no vocabulário dos rótulos de privacidade da App Store (Privacy Nutrition Labels),
+            todas vinculadas à identidade da conta e nenhuma utilizada para rastreamento:
+          </p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>e-mail e nome que você informa</li>
-            <li>senha, guardada só como hash, nunca em texto aberto</li>
-            <li>tarefas, dia marcado, ordem e se já foram feitas</li>
-            <li>preferências da conta, como o tema claro ou escuro</li>
-            <li>se entrar com Google, o identificador e o e-mail que o Google devolve</li>
+            <li>Informação de contato: correio eletrônico e nome informados pelo titular.</li>
+            <li>Credencial: senha armazenada apenas como hash, jamais em texto claro.</li>
+            <li>Conteúdo do usuário: tarefas, intervalo de datas, ordem e estado de conclusão.</li>
+            <li>Identificadores de sessão: cookie necessário e, neste aparelho, cópia local da sessão.</li>
+            <li>Preferências: tema claro ou escuro, somente se o titular autorizar a categoria correspondente.</li>
+            <li>Identificador devolvido pelo Google, quando a autenticação ocorrer por esse provedor, com o respectivo e-mail.</li>
           </ul>
           <p>
-            No celular, o uso de dados móveis se limita ao que você faz na hora: entrar, ler e salvar a sua lista,
-            guardar o tema se você permitir e, só se você ligar, enviar um aviso. Fechar o app interrompe esses envios.
-            Nada disso é vendido nem usado para anúncio.
+            O tráfego em rede móvel restringe-se às operações iniciadas pelo titular: autenticação, leitura e gravação
+            da lista, persistência do tema quando autorizada e, apenas se as notificações estiverem habilitadas, envio
+            de aviso. O encerramento do aplicativo interrompe novas transmissões. Não há transmissão contínua em
+            segundo plano, venda de dados nem uso publicitário da lista.
           </p>
           <p>
-            Esses dados servem para autenticar você, mostrar só a sua lista e lembrar as preferências. Não vendemos
-            dados e não usamos a lista para anúncio.
+            As finalidades são autenticação, exibição exclusiva da lista do titular e manutenção das preferências. Na
+            autenticação Google, a senha desse provedor não é recebida nem armazenada; o Google confirma a identidade e
+            devolve apenas os dados necessários à abertura da conta. A marca Google indica esse método e permanece de
+            titularidade da Google.
           </p>
           <p>
-            No login com Google, a senha do Google não fica neste app. O Google autentica você e envia o necessário
-            para abrir a conta. O logo do Google é da Google e só indica esse login.
+            A sessão é mantida por cookie estritamente necessário, com validade de sete dias. Preferências, análise,
+            marketing e recursos de terceiros são categorias independentes. Análise e marketing não são utilizados.
+            Recurso de terceiro, quando permitido, limita-se ao carregamento da fonte tipográfica.
           </p>
           <p>
-            A sessão de login fica num cookie necessário do navegador. Preferências, análise e marketing são escolhas separadas. Análise e marketing não são usados hoje. O tema claro ou escuro só fica neste aparelho se você permitir preferências.
-          </p>
-          <p>
-            Os dados ficam enquanto a conta existir. Na tela Privacidade, com a conta aberta, dá para baixar as tarefas
-            ou apagar a lista. Nome e e-mail se ajustam no Perfil. Apagar as tarefas não apaga o e-mail da conta.
-          </p>
-          <p>
-            Você pode pedir acesso, correção, informação e uma cópia do que está na lista. A exportação em JSON cobre a
-            portabilidade das tarefas.
+            Os dados permanecem enquanto a conta existir. Na tela Privacidade, com sessão ativa, o titular pode exportar
+            as tarefas em JSON, o que atende à portabilidade, ou excluir a lista. Nome e e-mail são alteráveis no
+            Perfil. A exclusão da lista não remove o correio eletrônico da conta. A exclusão integral da conta, nos
+            termos da diretriz 5.1.1 (v), opera pelo encerramento da sessão e pela solicitação ao controlador, sem
+            prejuízo dos direitos de acesso, correção e informação previstos na LGPD.
           </p>
         </Block>
 
         <Block id="direitos" title="Direitos autorais">
           <p>
-            O aplicativo, os textos da interface e o ícone são de Gabriel Teramae Chan. © 2026. Todos os direitos
-            reservados. Não copie, revenda ou publique o app, no todo ou em parte, sem autorização.
+            O aplicativo, os textos de interface e o ícone são de titularidade de Gabriel Teramae Chan. © 2026. Todos os
+            direitos reservados. É vedada a cópia, a revenda ou a publicação, total ou parcial, sem autorização.
           </p>
           <p>
-            O que você escreve nas tarefas continua sendo seu. Enviar uma tarefa não transfere esse texto para o autor
-            do app.
+            O conteúdo redigido nas tarefas permanece do usuário. O envio de uma tarefa não transfere a titularidade
+            desse texto ao autor do aplicativo.
           </p>
           <p>
-            Bibliotecas de código aberto usadas no projeto permanecem com a licença de cada autor. O nome e o logo do
-            Google pertencem à Google e não fazem parte desta marca.
+            Bibliotecas de código aberto conservam a licença de seus respectivos autores. O nome e o logotipo Google
+            pertencem à Google e não integram esta marca.
           </p>
         </Block>
       </div>
 
       <p className="mt-8 text-sm text-muted">
-        Com a conta aberta, a tela{" "}
+        A tela{" "}
         <Link to="/privacidade" className="font-medium text-accent hover:underline">
           Privacidade
-        </Link>{" "}
-        exporta ou apaga a lista.
+        </Link>
+        , com sessão ativa, permite exportar ou excluir a lista.
       </p>
     </LegalScreen>
   );
