@@ -14,15 +14,15 @@ export function notifyNow(title: string, body: string, tag: string) {
   }
 }
 
-function once(tag: string, title: string, body: string) {
+function claim(tag: string) {
   const key = `notify:${tag}`;
   try {
-    if (sessionStorage.getItem(key)) return;
+    if (sessionStorage.getItem(key)) return false;
     sessionStorage.setItem(key, "1");
+    return true;
   } catch {
-    /* still try to show it */
+    return true;
   }
-  notifyNow(title, body, tag);
 }
 
 export function notifyDue(tasks: DueTask[]) {
@@ -33,11 +33,15 @@ export function notifyDue(tasks: DueTask[]) {
     const when = new Date(task.dueAt);
     return !Number.isNaN(when.getTime()) && when.getTime() <= start.getTime();
   });
-  if (due.length === 0) return;
+  if (due.length === 0) return null;
   const day = new Date().toISOString().slice(0, 10);
   const names = due.slice(0, 3).map((task) => task.text);
   const extra = due.length > 3 ? ` e mais ${due.length - 3}` : "";
-  once(`due:${day}`, due.length === 1 ? "1 tarefa para hoje" : `${due.length} tarefas para hoje`, `${names.join(", ")}${extra}`);
+  const title = due.length === 1 ? "1 tarefa para hoje" : `${due.length} tarefas para hoje`;
+  const body = `${names.join(", ")}${extra}`;
+  if (!claim(`due:${day}`)) return null;
+  notifyNow(title, body, `due:${day}`);
+  return { title, body };
 }
 
 export function notifyDone(id: string, text: string) {

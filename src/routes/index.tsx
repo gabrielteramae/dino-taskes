@@ -19,6 +19,7 @@ import {
 } from "@/lib/tasks";
 import { getPrefs } from "@/lib/prefs";
 import { notifyDone, notifyDue } from "@/lib/notify";
+import { sendUserPush } from "@/lib/push";
 import { AccountMenu } from "@/components/account-menu";
 import { cn } from "@/lib/utils";
 
@@ -249,7 +250,8 @@ function TaskBoard() {
     let remind = false;
     const ping = () => {
       if (cancelled || !loaded || !remind) return;
-      notifyDue(loaded);
+      const summary = notifyDue(loaded);
+      if (summary) void sendUserPush({ data: summary }).catch(() => undefined);
     };
     listTasks()
       .then((rows) => {
@@ -322,7 +324,10 @@ function TaskBoard() {
     const next = tasksRef.current.map((task) => (task.id === id ? { ...task, done: !task.done } : task));
     tasksRef.current = next;
     setTasks(next);
-    if (willDone && notifyOnDone && current) notifyDone(id, current.text);
+    if (willDone && notifyOnDone && current) {
+      notifyDone(id, current.text);
+      void sendUserPush({ data: { title: "Tarefa concluída", body: current.text } }).catch(() => undefined);
+    }
     chain(id, async () => {
       const desired = tasksRef.current.find((task) => task.id === id)?.done;
       if (desired === undefined) return;
