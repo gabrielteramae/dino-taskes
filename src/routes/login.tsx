@@ -9,7 +9,85 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
-const GREENS = ["#145c32", "#176b34", "#1f7a3a", "#248a42", "#2f9a4a", "#3d9a56", "#4dba62"];
+const VERT = `
+attribute vec2 a_pos;
+attribute float a_size;
+attribute vec3 a_color;
+attribute float a_alpha;
+uniform vec2 u_res;
+varying vec3 v_color;
+varying float v_alpha;
+void main() {
+  vec2 clip = (a_pos / u_res) * 2.0 - 1.0;
+  clip.y *= -1.0;
+  gl_Position = vec4(clip, 0.0, 1.0);
+  gl_PointSize = a_size;
+  v_color = a_color;
+  v_alpha = a_alpha;
+}`;
+
+const FRAG = `
+precision mediump float;
+varying vec3 v_color;
+varying float v_alpha;
+void main() {
+  vec2 p = gl_PointCoord * 2.0 - 1.0;
+  float d = dot(p, p);
+  if (d > 1.0) discard;
+  float body = smoothstep(1.0, 0.2, d);
+  float glow = exp(-d * 2.4);
+  gl_FragColor = vec4(v_color, v_alpha * (body * 0.72 + glow * 0.38));
+}`;
+
+const WASH_VERT = `
+attribute vec2 a_pos;
+void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }`;
+
+const WASH_FRAG = `
+precision mediump float;
+uniform vec2 u_res;
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_res;
+  float top = smoothstep(0.95, 0.05, length(uv - vec2(0.18, 0.92)));
+  float corner = smoothstep(0.9, 0.0, length(uv - vec2(0.92, 0.08)));
+  vec3 green = vec3(0.18, 0.55, 0.32) * top + vec3(0.08, 0.38, 0.2) * corner;
+  gl_FragColor = vec4(green, max(top, corner) * 0.42);
+}`;
+
+const GREENS: Array<[number, number, number]> = [
+  [0.08, 0.36, 0.2],
+  [0.09, 0.42, 0.2],
+  [0.12, 0.48, 0.26],
+  [0.14, 0.54, 0.29],
+  [0.18, 0.6, 0.34],
+  [0.24, 0.67, 0.36],
+  [0.3, 0.73, 0.38],
+];
+
+function compile(gl: WebGLRenderingContext, type: number, source: string) {
+  const shader = gl.createShader(type);
+  if (!shader) return null;
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    gl.deleteShader(shader);
+    return null;
+  }
+  return shader;
+}
+
+function program(gl: WebGLRenderingContext, vert: string, frag: string) {
+  const vs = compile(gl, gl.VERTEX_SHADER, vert);
+  const fs = compile(gl, gl.FRAGMENT_SHADER, frag);
+  if (!vs || !fs) return null;
+  const handle = gl.createProgram();
+  if (!handle) return null;
+  gl.attachShader(handle, vs);
+  gl.attachShader(handle, fs);
+  gl.linkProgram(handle);
+  if (!gl.getProgramParameter(handle, gl.LINK_STATUS)) return null;
+  return handle;
+}
 
 function FallingField() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -17,102 +95,141 @@ function FallingField() {
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const gl = canvas.getContext("webgl", { alpha: true, antialias: false, premultipliedAlpha: false });
+    if (!gl) return;
+    const particles = program(gl, VERT, FRAG);
+    const wash = program(gl, WASH_VERT, WASH_FRAG);
+    if (!particles || !wash) return;
 
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let width = 0;
-    let height = 0;
-    let frame = 0;
+    const count = 110;
+    const pos = new Float32Array(count * 2);
+    const size = new Float32Array(count);
+    const color = new Float32Array(count * 3);
+    const alpha = new Float32Array(count);
+    const vx = new Float32Array(count);
+    const vy = new Float32Array(count);
+    const mass = new Float32Array(count);
+    const drag = new Float32Array(count);
 
-    type Dot = {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      r: number;
-      color: string;
-      glow: boolean;
-    };
+    let width = 1;
+    let height = 1;
+    let ratio = 1;
+    const maxPoint = (gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE) as Float32Array)[1] ?? 64;
 
-    const dots: Dot[] = [];
-
-    const spawn = (anywhere: boolean, glow = false) => {
-      dots.push({
-        x: Math.random() * width,
-        y: anywhere ? Math.random() * height : -12,
-        vx: (Math.random() - 0.5) * (glow ? 0.15 : 0.4),
-        vy: glow ? 0.15 + Math.random() * 0.25 : 0.15 + Math.random() * 0.35,
-        r: glow ? 18 + Math.random() * 36 : 1.4 + Math.random() * 2.8,
-        color: GREENS[Math.floor(Math.random() * GREENS.length)] ?? "#3d9a56",
-        glow,
-      });
+    const reset = (i: number, anywhere: boolean) => {
+      const tone = GREENS[i % GREENS.length] ?? GREENS[0];
+      const glow = i < 16;
+      const radius = glow ? 28 + (i % 5) * 6 : 3 + (i % 7) * 0.7;
+      pos[i * 2] = Math.random() * width;
+      pos[i * 2 + 1] = anywhere ? Math.random() * height : -radius;
+      vx[i] = (Math.random() - 0.5) * 18;
+      vy[i] = anywhere ? 40 + Math.random() * 80 : 0;
+      size[i] = Math.min(maxPoint, radius * 2 * ratio);
+      alpha[i] = glow ? 0.45 : 0.9;
+      mass[i] = radius * radius * radius * 0.02;
+      drag[i] = radius * radius * 0.0009;
+      color[i * 3] = tone[0];
+      color[i * 3 + 1] = tone[1];
+      color[i * 3 + 2] = tone[2];
     };
 
     const resize = () => {
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      width = canvas.clientWidth;
-      height = canvas.clientHeight;
+      ratio = Math.min(window.devicePixelRatio || 1, 2);
+      width = canvas.clientWidth || 1;
+      height = canvas.clientHeight || 1;
       canvas.width = Math.floor(width * ratio);
       canvas.height = Math.floor(height * ratio);
-      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      gl.viewport(0, 0, canvas.width, canvas.height);
     };
 
     resize();
+    for (let i = 0; i < count; i += 1) reset(i, true);
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
-    for (let i = 0; i < 36; i += 1) spawn(true);
-    for (let i = 0; i < 7; i += 1) spawn(true, true);
 
-    const gravity = 0.028;
-    let raf = 0;
+    const posBuf = gl.createBuffer();
+    const sizeBuf = gl.createBuffer();
+    const colorBuf = gl.createBuffer();
+    const alphaBuf = gl.createBuffer();
+    const washBuf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, washBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
 
-    const paint = () => {
-      ctx.clearRect(0, 0, width, height);
-      const top = ctx.createRadialGradient(width * 0.15, 0, 0, width * 0.15, 0, width * 0.85);
-      top.addColorStop(0, "rgba(61,154,86,0.28)");
-      top.addColorStop(1, "rgba(61,154,86,0)");
-      ctx.fillStyle = top;
-      ctx.fillRect(0, 0, width, height);
-      const corner = ctx.createRadialGradient(width, height, 0, width, height, width * 0.7);
-      corner.addColorStop(0, "rgba(23,107,52,0.22)");
-      corner.addColorStop(1, "rgba(23,107,52,0)");
-      ctx.fillStyle = corner;
-      ctx.fillRect(0, 0, width, height);
-
-      if (!reduce && !document.hidden) {
-        if (dots.filter((dot) => !dot.glow).length < 54) spawn(false);
-        if (dots.filter((dot) => dot.glow).length < 7) spawn(false, true);
-        for (let i = dots.length - 1; i >= 0; i -= 1) {
-          const dot = dots[i];
-          if (!dot) continue;
-          dot.vy += dot.glow ? gravity * 0.35 : gravity;
-          dot.x += dot.vx;
-          dot.y += dot.vy;
-          const enter = Math.min(1, (dot.y + 20) / 80);
-          const exit = Math.max(0, 1 - Math.max(0, dot.y - height * 0.62) / (height * 0.42));
-          const fade = Math.max(0, Math.min(1, enter * exit));
-          ctx.globalAlpha = fade * (dot.glow ? 0.55 : 1);
-          if (dot.glow) {
-            const glow = ctx.createRadialGradient(dot.x, dot.y, 0, dot.x, dot.y, dot.r);
-            glow.addColorStop(0, "rgba(61,154,86,0.45)");
-            glow.addColorStop(1, "rgba(61,154,86,0)");
-            ctx.fillStyle = glow;
-          } else {
-            ctx.fillStyle = dot.color;
-          }
-          ctx.beginPath();
-          ctx.arc(dot.x, dot.y, dot.r, 0, Math.PI * 2);
-          ctx.fill();
-          if (dot.y - dot.r > height + 8) dots.splice(i, 1);
-        }
-        ctx.globalAlpha = 1;
-      }
-
-      frame = window.requestAnimationFrame(paint);
+    const loc = {
+      pos: gl.getAttribLocation(particles, "a_pos"),
+      size: gl.getAttribLocation(particles, "a_size"),
+      color: gl.getAttribLocation(particles, "a_color"),
+      alpha: gl.getAttribLocation(particles, "a_alpha"),
+      res: gl.getUniformLocation(particles, "u_res"),
+      washPos: gl.getAttribLocation(wash, "a_pos"),
+      washRes: gl.getUniformLocation(wash, "u_res"),
     };
 
-    frame = window.requestAnimationFrame(paint);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    const gravity = 980;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let last = performance.now();
+    let frame = 0;
+
+    const draw = (now: number) => {
+      const dt = Math.min(0.033, (now - last) / 1000);
+      last = now;
+      const wind = Math.sin(now * 0.0004) * 26 + Math.sin(now * 0.00017) * 12;
+
+      if (!reduce && !document.hidden) {
+        for (let i = 0; i < count; i += 1) {
+          const speed = Math.hypot(vx[i] ?? 0, vy[i] ?? 0);
+          const m = mass[i] || 1;
+          const c = drag[i] || 0;
+          vx[i] = (vx[i] ?? 0) + ((-c * speed * (vx[i] ?? 0)) / m + wind / m) * dt;
+          vy[i] = (vy[i] ?? 0) + (gravity + (-c * speed * (vy[i] ?? 0)) / m) * dt;
+          pos[i * 2] = (pos[i * 2] ?? 0) + (vx[i] ?? 0) * dt;
+          pos[i * 2 + 1] = (pos[i * 2 + 1] ?? 0) + (vy[i] ?? 0) * dt;
+          if ((pos[i * 2] ?? 0) < -40) pos[i * 2] = width + 20;
+          if ((pos[i * 2] ?? 0) > width + 40) pos[i * 2] = -20;
+          const y = pos[i * 2 + 1] ?? 0;
+          if (y - (size[i] ?? 0) > height + 8) reset(i, false);
+          const enter = Math.min(1, (y + 30) / 90);
+          const exit = Math.max(0, 1 - Math.max(0, y - height * 0.58) / (height * 0.46));
+          alpha[i] = Math.max(0, Math.min(1, enter * exit)) * (i < 16 ? 0.55 : 0.92);
+        }
+      }
+
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.useProgram(wash);
+      gl.bindBuffer(gl.ARRAY_BUFFER, washBuf);
+      gl.enableVertexAttribArray(loc.washPos);
+      gl.vertexAttribPointer(loc.washPos, 2, gl.FLOAT, false, 0, 0);
+      gl.uniform2f(loc.washRes, canvas.width, canvas.height);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+      gl.useProgram(particles);
+      gl.uniform2f(loc.res, width, height);
+      gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, pos, gl.DYNAMIC_DRAW);
+      gl.enableVertexAttribArray(loc.pos);
+      gl.vertexAttribPointer(loc.pos, 2, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, size, gl.DYNAMIC_DRAW);
+      gl.enableVertexAttribArray(loc.size);
+      gl.vertexAttribPointer(loc.size, 1, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, color, gl.DYNAMIC_DRAW);
+      gl.enableVertexAttribArray(loc.color);
+      gl.vertexAttribPointer(loc.color, 3, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, alphaBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, alpha, gl.DYNAMIC_DRAW);
+      gl.enableVertexAttribArray(loc.alpha);
+      gl.vertexAttribPointer(loc.alpha, 1, gl.FLOAT, false, 0, 0);
+      gl.drawArrays(gl.POINTS, 0, count);
+
+      if (!reduce) frame = window.requestAnimationFrame(draw);
+    };
+
+    frame = window.requestAnimationFrame(draw);
     return () => {
       window.cancelAnimationFrame(frame);
       observer.disconnect();
