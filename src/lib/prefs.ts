@@ -3,6 +3,8 @@ import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
 
+import { isThemeMode, type ThemeMode } from "@/lib/theme";
+
 export type UserPrefs = {
   displayName: string;
   dinoTalks: boolean;
@@ -10,6 +12,7 @@ export type UserPrefs = {
   confirmDelete: boolean;
   notifyDone: boolean;
   notifyDino: boolean;
+  theme: ThemeMode;
 };
 
 const DEFAULTS: UserPrefs = {
@@ -19,6 +22,7 @@ const DEFAULTS: UserPrefs = {
   confirmDelete: false,
   notifyDone: true,
   notifyDino: true,
+  theme: "dark",
 };
 
 function asBool(v: unknown, fallback: boolean) {
@@ -37,6 +41,7 @@ function rowToPrefs(row: Record<string, unknown> | undefined): UserPrefs {
     confirmDelete: asBool(row.confirm_delete, false),
     notifyDone: asBool(row.notify_done, true),
     notifyDino: asBool(row.notify_dino, true),
+    theme: isThemeMode(row.theme) ? row.theme : "dark",
   };
 }
 
@@ -57,6 +62,7 @@ const Patch = z
     confirmDelete: z.boolean().optional(),
     notifyDone: z.boolean().optional(),
     notifyDino: z.boolean().optional(),
+    theme: z.enum(["dark", "light"]).optional(),
   })
   .strict();
 
@@ -65,7 +71,7 @@ export const getPrefs = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<UserPrefs> => {
     const sql = await getSql();
     const rows = await sql<Record<string, unknown>>`
-      select display_name, dino_talks, dino_small, confirm_delete, notify_done, notify_dino
+      select display_name, dino_talks, dino_small, confirm_delete, notify_done, notify_dino, theme
       from user_prefs where user_id = ${context.userId}
     `;
     if (rows[0]) return rowToPrefs(rows[0]);
@@ -82,7 +88,7 @@ export const updatePrefs = createServerFn({ method: "POST" })
   .handler(async ({ context, data }): Promise<UserPrefs> => {
     const sql = await getSql();
     const currentRows = await sql<Record<string, unknown>>`
-      select display_name, dino_talks, dino_small, confirm_delete, notify_done, notify_dino
+      select display_name, dino_talks, dino_small, confirm_delete, notify_done, notify_dino, theme
       from user_prefs where user_id = ${context.userId}
     `;
     const current = rowToPrefs(currentRows[0]);
@@ -94,14 +100,15 @@ export const updatePrefs = createServerFn({ method: "POST" })
       confirmDelete: data.confirmDelete ?? current.confirmDelete,
       notifyDone: data.notifyDone ?? current.notifyDone,
       notifyDino: data.notifyDino ?? current.notifyDino,
+      theme: data.theme ?? current.theme,
     };
     await sql`
       insert into user_prefs (
-        user_id, display_name, dino_talks, dino_small, confirm_delete, notify_done, notify_dino, updated_at
+        user_id, display_name, dino_talks, dino_small, confirm_delete, notify_done, notify_dino, theme, updated_at
       )
       values (
         ${context.userId}, ${next.displayName}, ${next.dinoTalks}, ${next.dinoSmall},
-        ${next.confirmDelete}, ${next.notifyDone}, ${next.notifyDino}, now()
+        ${next.confirmDelete}, ${next.notifyDone}, ${next.notifyDino}, ${next.theme}, now()
       )
       on conflict (user_id) do update set
         display_name = excluded.display_name,
@@ -110,6 +117,7 @@ export const updatePrefs = createServerFn({ method: "POST" })
         confirm_delete = excluded.confirm_delete,
         notify_done = excluded.notify_done,
         notify_dino = excluded.notify_dino,
+        theme = excluded.theme,
         updated_at = now()
     `;
     return next;

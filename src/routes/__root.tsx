@@ -1,6 +1,9 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
+import { getPrefs } from "@/lib/prefs";
+import { applyTheme, readStoredTheme } from "@/lib/theme";
 import appCss from "../styles.css?url";
 
 const APP_NAME = "Dino Tarefas";
@@ -30,12 +33,33 @@ export const Route = createRootRoute({
       },
     ],
   }),
-  component: () => (
+  component: Root,
+});
+
+function ThemeSync() {
+  useEffect(() => {
+    applyTheme(readStoredTheme());
+    void getPrefs()
+      .then((prefs) => applyTheme(prefs.theme))
+      .catch(() => undefined);
+  }, []);
+  return null;
+}
+
+function Root() {
+  return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              '(function(){try{if(localStorage.getItem("dino-theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}})()',
+          }}
+        />
         <HeadContent />
       </head>
       <body>
+        <ThemeSync />
         <PreviewHostBridge />
         <AuthProvider>
           <Outlet />
@@ -43,5 +67,5 @@ export const Route = createRootRoute({
         <Scripts />
       </body>
     </html>
-  ),
-});
+  );
+}
