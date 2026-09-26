@@ -4,14 +4,8 @@ export function notificationsSupported() {
   return typeof Notification !== "undefined";
 }
 
-export function notifyNow(title: string, body: string, tag: string) {
-  if (!notificationsSupported() || Notification.permission !== "granted") return false;
-  try {
-    new Notification(title, { body, tag });
-    return true;
-  } catch {
-    return false;
-  }
+export function notifyNow(_title: string, _body: string, _tag: string) {
+  return false;
 }
 
 function claim(tag: string) {

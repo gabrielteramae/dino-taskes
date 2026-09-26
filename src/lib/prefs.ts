@@ -20,8 +20,8 @@ const DEFAULTS: UserPrefs = {
   dinoTalks: true,
   dinoSmall: false,
   confirmDelete: false,
-  notifyDone: true,
-  notifyDino: true,
+  notifyDone: false,
+  notifyDino: false,
   theme: "dark",
 };
 
@@ -39,8 +39,8 @@ function rowToPrefs(row: Record<string, unknown> | undefined): UserPrefs {
     dinoTalks: asBool(row.dino_talks, true),
     dinoSmall: asBool(row.dino_small, false),
     confirmDelete: asBool(row.confirm_delete, false),
-    notifyDone: asBool(row.notify_done, true),
-    notifyDino: asBool(row.notify_dino, true),
+    notifyDone: asBool(row.notify_done, false),
+    notifyDino: asBool(row.notify_dino, false),
     theme: isThemeMode(row.theme) ? row.theme : "dark",
   };
 }

@@ -20,8 +20,6 @@ import {
   type TaskRow,
 } from "@/lib/tasks";
 import { getPrefs } from "@/lib/prefs";
-import { notifyDone, notifyDue } from "@/lib/notify";
-import { sendUserPush } from "@/lib/push";
 import { AccountMenu } from "@/components/account-menu";
 import { cn } from "@/lib/utils";
 import { calendarDay, clockOf, formatRange, spanDays, withClock } from "@/lib/dates";
@@ -247,7 +245,6 @@ function TaskBoard() {
   const [group, setGroup] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [notifyOnDone, setNotifyOnDone] = useState(true);
   const [tab, setTab] = useState<DockTab>("tarefas");
   const [streak, setStreak] = useState(0);
   const [dragId, setDragId] = useState<string | null>(null);
@@ -265,19 +262,10 @@ function TaskBoard() {
 
   useEffect(() => {
     let cancelled = false;
-    let loaded: TaskRow[] | null = null;
-    let remind = false;
-    const ping = () => {
-      if (cancelled || !loaded || !remind) return;
-      const summary = notifyDue(loaded);
-      if (summary) void sendUserPush({ data: summary }).catch(() => undefined);
-    };
     listTasks()
       .then((rows) => {
         if (cancelled) return;
         setTasks(rows);
-        loaded = rows;
-        ping();
       })
       .catch((err) => {
         if (isUnauthorized(err) || cancelled) return;
@@ -290,9 +278,6 @@ function TaskBoard() {
         if (cancelled) return;
         setConfirmDelete(p.confirmDelete);
         setDisplayName(p.displayName);
-        setNotifyOnDone(p.notifyDone);
-        remind = p.notifyDino;
-        ping();
       })
       .catch(() => undefined);
     void getStreak()
@@ -340,15 +325,9 @@ function TaskBoard() {
   };
 
   const toggle = async (id: string) => {
-    const current = tasksRef.current.find((task) => task.id === id);
-    const willDone = !current?.done;
     const next = tasksRef.current.map((task) => (task.id === id ? { ...task, done: !task.done } : task));
     tasksRef.current = next;
     setTasks(next);
-    if (willDone && notifyOnDone && current) {
-      notifyDone(id, current.text);
-      void sendUserPush({ data: { title: "Tarefa concluída", body: current.text } }).catch(() => undefined);
-    }
     chain(id, async () => {
       const desired = tasksRef.current.find((task) => task.id === id)?.done;
       if (desired === undefined) return;

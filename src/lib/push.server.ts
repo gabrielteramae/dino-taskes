@@ -46,27 +46,6 @@ export async function removeSubscription(userId: string, endpoint: string) {
   `;
 }
 
-export async function deliver(userId: string, title: string, body: string) {
-  const pair = await keys();
-  webpush.setVapidDetails(SUBJECT, pair.publicKey, pair.privateKey);
-  const sql = await getSql();
-  const rows = await sql<{ endpoint: string; p256dh: string; auth_key: string }>`
-    select endpoint, p256dh, auth_key from push_subscriptions where user_id = ${userId}
-  `;
-  let sent = 0;
-  for (const row of rows) {
-    try {
-      await webpush.sendNotification(
-        { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth_key } },
-        JSON.stringify({ title, body }),
-      );
-      sent += 1;
-    } catch (err) {
-      const status = typeof err === "object" && err && "statusCode" in err ? Number(err.statusCode) : 0;
-      if (status === 404 || status === 410) {
-        await sql`delete from push_subscriptions where endpoint = ${row.endpoint}`;
-      }
-    }
-  }
-  return { sent };
+export async function deliver(_userId: string, _title: string, _body: string) {
+  return { sent: 0 };
 }
