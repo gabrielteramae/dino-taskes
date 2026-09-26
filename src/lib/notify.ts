@@ -1,4 +1,4 @@
-type DueTask = { id: string; text: string; done: boolean; dueAt: string | null };
+type DueTask = { id: string; text: string; done: boolean; dueAt: string | null; endsAt?: string | null };
 
 export function notificationsSupported() {
   return typeof Notification !== "undefined";
@@ -29,9 +29,14 @@ export function notifyDue(tasks: DueTask[]) {
   const start = new Date();
   start.setHours(23, 59, 59, 999);
   const due = tasks.filter((task) => {
-    if (task.done || !task.dueAt) return false;
-    const when = new Date(task.dueAt);
-    return !Number.isNaN(when.getTime()) && when.getTime() <= start.getTime();
+    if (task.done) return false;
+    const begin = task.dueAt ? new Date(task.dueAt) : null;
+    const finish = task.endsAt ? new Date(task.endsAt) : begin;
+    if (!finish || Number.isNaN(finish.getTime())) return false;
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const beginMs = begin && !Number.isNaN(begin.getTime()) ? begin.getTime() : finish.getTime();
+    return beginMs <= start.getTime() && finish.getTime() >= startOfToday.getTime() || finish.getTime() < startOfToday.getTime();
   });
   if (due.length === 0) return null;
   const day = new Date().toISOString().slice(0, 10);

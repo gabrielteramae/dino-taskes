@@ -13,7 +13,7 @@ import {
   recordClear,
   removeTask,
   reorderTasks,
-  setTaskDay,
+  setTaskSpan,
   toggleTask,
   type TaskRow,
 } from "@/lib/tasks";
@@ -23,7 +23,64 @@ import { sendUserPush } from "@/lib/push";
 import { AccountMenu } from "@/components/account-menu";
 import { cn } from "@/lib/utils";
 
-const CATEGORY_LABEL = { trabalho: "Trabalho", casa: "Casa", estudo: "Estudo" } as const;
+function spanDays(startIso: string | null, endIso: string | null) {
+  const start = dayValue(startIso);
+  const end = dayValue(endIso) || start;
+  if (!start) return [] as string[];
+  const from = start <= end ? start : end;
+  const to = start <= end ? end : start;
+  const days: string[] = [];
+  const cursor = new Date(`${from}T12:00:00`);
+  const last = new Date(`${to}T12:00:00`);
+  while (cursor.getTime() <= last.getTime() && days.length < 400) {
+    days.push(isoDay(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return days;
+}
+
+function formatRange(startIso: string | null, endIso: string | null) {
+  const start = formatDue(startIso);
+  const end = formatDue(endIso);
+  if (!start) return null;
+  if (!end || start === end) return start;
+  return `${start} – ${end}`;
+}
+
+const STOP_WORDS = new Set([
+  "para", "com", "uma", "uns", "umas", "que", "das", "dos", "por", "nao", "ate", "dia", "dias",
+  "tarefa", "fazer", "hoje", "amanha", "depois", "antes", "sobre", "entre", "pelo", "pela",
+]);
+
+function similarFilters(tasks: TaskRow[]) {
+  const counts = new Map<string, string[]>();
+  for (const task of tasks) {
+    if (task.done) continue;
+    const seen = new Set<string>();
+    const words = task.text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .split(/[^a-z0-9]+/)
+      .filter((word) => word.length >= 4 && !STOP_WORDS.has(word));
+    for (const word of words) {
+      if (seen.has(word)) continue;
+      seen.add(word);
+      const ids = counts.get(word) ?? [];
+      ids.push(task.id);
+      counts.set(word, ids);
+    }
+  }
+  return [...counts.entries()]
+    .filter(([, ids]) => ids.length >= 2)
+    .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))
+    .slice(0, 6)
+    .map(([word, ids]) => ({
+      id: word,
+      label: word.charAt(0).toUpperCase() + word.slice(1),
+      ids: new Set(ids),
+    }));
+}
 
 const EMOJI_RULES: Array<{ keys: string[]; emoji: string }> = [
   { keys: ["cafe", "coffee"], emoji: "☕" },
@@ -129,7 +186,7 @@ function Agenda({
     return (
       <div className="rounded-3xl bg-surface px-5 py-10 text-center shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
         <p className="text-sm text-muted">Nada no calendário</p>
-        <p className="mt-1 text-xs text-subtle">Na lista, escolha o dia de uma tarefa. Ela aparece aqui.</p>
+        <p className="mt-1 text-xs text-subtle">Na lista, escolha de que dia até que dia. Ela aparece aqui.</p>
       </div>
     );
   }
@@ -232,8 +289,7 @@ function TaskBoard() {
   const [ready, setReady] = useState(false);
   const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
-  const [listFilter, setListFilter] = useState<"todas" | "hoje" | "sem-dia">("todas");
-  const [newCategory, setNewCategory] = useState<TaskRow["category"]>("estudo");
+  const [group, setGroup] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [notifyOnDone, setNotifyOnDone] = useState(true);
@@ -303,9 +359,10 @@ function TaskBoard() {
       id,
       text,
       done: false,
-      category: newCategory,
+      category: "estudo",
       priority: "normal",
       dueAt: null,
+      endsAt: null,
       sortOrder: (tasksRef.current[0]?.sortOrder ?? 0) - 1,
     };
     tasksRef.current = [temp, ...tasksRef.current];
@@ -381,12 +438,13 @@ function TaskBoard() {
     });
   };
 
+  const filters = similarFilters(tasks);
+  const active = filters.find((item) => item.id === group) ?? null;
   const visible = tasks.filter((task) => {
     if (tab === "feitas") return task.done;
     if (task.done) return false;
     if (query.trim() && !task.text.toLowerCase().includes(query.trim().toLowerCase())) return false;
-    if (listFilter === "hoje") return isSameDay(task.dueAt);
-    if (listFilter === "sem-dia") return !task.dueAt;
+    if (active && !active.ids.has(task.id)) return false;
     return true;
   });
 
@@ -418,8 +476,9 @@ function TaskBoard() {
   };
 
   const renderTask = (task: TaskRow) => {
-    const dueLabel = formatDue(task.dueAt);
-    const overdue = Boolean(task.dueAt && !task.done && new Date(task.dueAt).getTime() < Date.now() && !isSameDay(task.dueAt));
+    const dueLabel = formatRange(task.dueAt, task.endsAt);
+    const end = task.endsAt ?? task.dueAt;
+    const overdue = Boolean(end && !task.done && new Date(end).getTime() < Date.now() && !isSameDay(end));
     return (
       <li
         key={task.id}
@@ -491,26 +550,35 @@ function TaskBoard() {
             {task.text}
           </span>
           <span className="mt-1 flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] text-muted">
-              {CATEGORY_LABEL[task.category]}
-            </span>
             {dueLabel ? (
               <span className={cn("text-xs", overdue ? "text-danger" : "text-subtle")}>{dueLabel}</span>
             ) : tab === "tarefas" ? (
-              <span className="text-xs text-subtle">Sem dia</span>
+              <span className="text-xs text-subtle">Sem período</span>
             ) : null}
           </span>
           {tab === "tarefas" && !task.done ? (
-            <label className="mt-2 flex items-center gap-2 text-xs text-subtle">
-              Dia
-              <input
-                type="date"
-                aria-label={`Dia de ${task.text}`}
-                value={dayValue(task.dueAt)}
-                onChange={(event) => schedule(task.id, event.target.value)}
-                className="h-8 rounded-lg bg-surface-2 px-2 text-xs text-fg"
-              />
-            </label>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <label className="flex flex-col gap-1 text-[11px] text-subtle">
+                De
+                <input
+                  type="date"
+                  aria-label={`Começo de ${task.text}`}
+                  value={dayValue(task.dueAt)}
+                  onChange={(event) => spanChange(task, "start", event.target.value)}
+                  className="h-8 rounded-lg bg-surface-2 px-2 text-xs text-fg"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-[11px] text-subtle">
+                Até
+                <input
+                  type="date"
+                  aria-label={`Fim de ${task.text}`}
+                  value={dayValue(task.endsAt ?? task.dueAt)}
+                  onChange={(event) => spanChange(task, "end", event.target.value)}
+                  className="h-8 rounded-lg bg-surface-2 px-2 text-xs text-fg"
+                />
+              </label>
+            </div>
           ) : null}
         </span>
         <span
@@ -532,44 +600,53 @@ function TaskBoard() {
     );
   };
 
-  const titles: Record<DockTab, string> = {
-    tarefas: "Lista",
-    hoje: "Calendário",
-    feitas: "Feitas",
-  };
-
-  const schedule = async (id: string, day: string) => {
-    const dueAt = day ? new Date(`${day}T12:00:00`).toISOString() : null;
-    const previous = tasksRef.current.find((task) => task.id === id)?.dueAt ?? null;
-    const next = tasksRef.current.map((task) => (task.id === id ? { ...task, dueAt } : task));
+  const spanChange = (task: TaskRow, which: "start" | "end", day: string) => {
+    let start = dayValue(task.dueAt);
+    let end = dayValue(task.endsAt ?? task.dueAt);
+    if (which === "start") start = day;
+    else end = day;
+    if (start && end && end < start) {
+      if (which === "start") end = start;
+      else start = end;
+    }
+    if (!start && end) start = end;
+    if (start && !end) end = start;
+    const startAt = start ? new Date(`${start}T12:00:00`).toISOString() : null;
+    const endAt = end ? new Date(`${end}T12:00:00`).toISOString() : null;
+    const previous = tasksRef.current.find((item) => item.id === task.id);
+    const next = tasksRef.current.map((item) => (item.id === task.id ? { ...item, dueAt: startAt, endsAt: endAt } : item));
     tasksRef.current = next;
     setTasks(next);
-    chain(id, async () => {
-      const current = tasksRef.current.find((task) => task.id === id)?.dueAt ?? null;
+    chain(task.id, async () => {
       try {
-        await setTaskDay({ data: { id, dueAt: current } });
+        await setTaskSpan({ data: { id: task.id, startAt, endAt } });
       } catch (err) {
-        if (isUnauthorized(err)) return;
-        const restored = tasksRef.current.map((task) => (task.id === id ? { ...task, dueAt: previous } : task));
+        if (isUnauthorized(err) || !previous) return;
+        const restored = tasksRef.current.map((item) => (item.id === task.id ? previous : item));
         tasksRef.current = restored;
         setTasks(restored);
       }
     });
   };
 
+  const titles: Record<DockTab, string> = {
+    tarefas: "Lista",
+    hoje: "Calendário",
+    feitas: "Feitas",
+  };
+
   const agendaGroups = () => {
     const pending = tasks.filter((task) => !task.done);
-    const open = pending.filter((task) => !task.dueAt);
+    const open = pending.filter((task) => !task.dueAt && !task.endsAt);
     const byDay = new Map<string, TaskRow[]>();
     for (const task of pending) {
-      if (!task.dueAt) continue;
-      const key = dayValue(task.dueAt);
-      if (!key) continue;
-      const list = byDay.get(key) ?? [];
-      list.push(task);
-      byDay.set(key, list);
+      for (const key of spanDays(task.dueAt, task.endsAt)) {
+        const list = byDay.get(key) ?? [];
+        list.push(task);
+        byDay.set(key, list);
+      }
     }
-    return { open, days: [...byDay.keys()].sort() , byDay };
+    return { open, days: [...byDay.keys()].sort(), byDay };
   };
 
   const today = new Date();
@@ -598,7 +675,7 @@ function TaskBoard() {
               <h1 className="text-2xl font-semibold tracking-tight">{titles[tab]}</h1>
               <p className="mt-1 text-xs text-subtle">
                 {tab === "hoje"
-                  ? "Só as tarefas que já têm um dia."
+                  ? "O período de cada tarefa aparece nos dias."
                   : "As que você marcou como feitas."}
               </p>
             </div>
@@ -627,27 +704,6 @@ function TaskBoard() {
                 <Plus className="size-5" strokeWidth={2} />
               </Button>
             </div>
-            <div className="flex gap-2">
-              {(
-                [
-                  ["trabalho", "Trabalho"],
-                  ["casa", "Casa"],
-                  ["estudo", "Estudo"],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setNewCategory(value)}
-                  className={cn(
-                    "rounded-full px-3 py-1.5 text-xs",
-                    newCategory === value ? "bg-accent text-accent-fg" : "bg-surface text-muted",
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
           </form>
         ) : null}
 
@@ -659,27 +715,23 @@ function TaskBoard() {
               placeholder="Buscar tarefa"
               aria-label="Buscar tarefa"
             />
-            <div className="flex gap-2">
-              {(
-                [
-                  ["todas", "Todas"],
-                  ["hoje", "Hoje"],
-                  ["sem-dia", "Sem dia"],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setListFilter(value)}
-                  className={cn(
-                    "rounded-full px-3 py-1.5 text-xs",
-                    listFilter === value ? "bg-fg text-bg" : "bg-surface text-muted",
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            {filters.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {filters.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setGroup(group === item.id ? null : item.id)}
+                    className={cn(
+                      "rounded-full px-3 py-1.5 text-xs",
+                      group === item.id ? "bg-fg text-bg" : "bg-surface text-muted",
+                    )}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
         ) : null}
 

@@ -13,6 +13,7 @@ export type TaskRow = {
   category: TaskCategory;
   priority: TaskPriority;
   dueAt: string | null;
+  endsAt: string | null;
   sortOrder: number;
 };
 
@@ -58,13 +59,15 @@ const AddInput = z.object({
   category: z.enum(CATEGORIES).optional(),
   priority: z.enum(PRIORITIES).optional(),
   dueAt: z.string().max(40).nullable().optional(),
+  endsAt: z.string().max(40).nullable().optional(),
   id: z.string().uuid().optional(),
   sortOrder: z.number().int().min(-100000).max(100000).optional(),
 });
 
-const DayInput = z.object({
+const SpanInput = z.object({
   id: z.string().uuid(),
-  dueAt: z.string().max(40).nullable(),
+  startAt: z.string().max(40).nullable(),
+  endAt: z.string().max(40).nullable(),
 });
 
 const OrderInput = z.object({
@@ -78,6 +81,7 @@ type DbTask = {
   category: string;
   priority: string;
   due_at: string | null;
+  ends_at: string | null;
   sort_order: number;
 };
 
@@ -97,6 +101,7 @@ function toRow(row: DbTask): TaskRow {
     category: asCategory(row.category),
     priority: asPriority(row.priority),
     dueAt: row.due_at,
+    endsAt: row.ends_at,
     sortOrder: Number(row.sort_order) || 0,
   };
 }
@@ -123,7 +128,7 @@ export const listTasks = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<TaskRow[]> => {
     const sql = await getSql();
     return sql<DbTask>`
-      select id, text, done, category, priority, due_at::text as due_at, sort_order
+      select id, text, done, category, priority, due_at::text as due_at, ends_at::text as ends_at, sort_order
       from tasks
       where user_id = ${context.userId}
       order by sort_order asc, created_at desc
@@ -140,6 +145,7 @@ export const addTask = createServerFn({ method: "POST" })
     const category = data.category ?? "estudo";
     const priority = data.priority ?? "normal";
     const dueAt = parseDue(data.dueAt);
+    const endsAt = parseDue(data.endsAt);
     const sql = await getSql();
     const counted = await sql<{ n: number }>`
       select count(*)::int as n from tasks where user_id = ${context.userId}
@@ -154,9 +160,9 @@ export const addTask = createServerFn({ method: "POST" })
       sortOrder = (mins[0]?.n ?? 0) - 1;
     }
     const rows = await sql<DbTask>`
-      insert into tasks (id, user_id, text, done, category, priority, due_at, sort_order)
-      values (${id}, ${context.userId}, ${text}, false, ${category}, ${priority}, ${dueAt}, ${sortOrder})
-      returning id, text, done, category, priority, due_at::text as due_at, sort_order
+      insert into tasks (id, user_id, text, done, category, priority, due_at, ends_at, sort_order)
+      values (${id}, ${context.userId}, ${text}, false, ${category}, ${priority}, ${dueAt}, ${endsAt}, ${sortOrder})
+      returning id, text, done, category, priority, due_at::text as due_at, ends_at::text as ends_at, sort_order
     `;
     const row = rows[0];
     if (!row) fail();
@@ -173,25 +179,33 @@ export const toggleTask = createServerFn({ method: "POST" })
       update tasks
       set done = not done
       where id = ${data.id} and user_id = ${context.userId}
-      returning id, text, done, category, priority, due_at::text as due_at, sort_order
+      returning id, text, done, category, priority, due_at::text as due_at, ends_at::text as ends_at, sort_order
     `;
     const row = rows[0];
     if (!row) fail();
     return toRow(row);
   });
 
-export const setTaskDay = createServerFn({ method: "POST" })
+export const setTaskSpan = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((input: unknown) => DayInput.parse(input))
+  .validator((input: unknown) => SpanInput.parse(input))
   .handler(async ({ context, data }): Promise<TaskRow> => {
     rateLimit(context.userId);
-    const dueAt = parseDue(data.dueAt);
+    let startAt = parseDue(data.startAt);
+    let endAt = parseDue(data.endAt);
+    if (startAt && endAt && new Date(endAt).getTime() < new Date(startAt).getTime()) {
+      const swap = startAt;
+      startAt = endAt;
+      endAt = swap;
+    }
+    if (startAt && !endAt) endAt = startAt;
+    if (endAt && !startAt) startAt = endAt;
     const sql = await getSql();
     const rows = await sql<DbTask>`
       update tasks
-      set due_at = ${dueAt}
+      set due_at = ${startAt}, ends_at = ${endAt}
       where id = ${data.id} and user_id = ${context.userId}
-      returning id, text, done, category, priority, due_at::text as due_at, sort_order
+      returning id, text, done, category, priority, due_at::text as due_at, ends_at::text as ends_at, sort_order
     `;
     const row = rows[0];
     if (!row) fail();
@@ -227,7 +241,7 @@ export const exportMyData = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const sql = await getSql();
     const tasks = await sql<DbTask>`
-      select id, text, done, category, priority, due_at::text as due_at, sort_order
+      select id, text, done, category, priority, due_at::text as due_at, ends_at::text as ends_at, sort_order
       from tasks where user_id = ${context.userId}
       order by sort_order asc, created_at desc
     `;
