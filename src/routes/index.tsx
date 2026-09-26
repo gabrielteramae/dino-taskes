@@ -23,7 +23,8 @@ import { notifyDone, notifyDue } from "@/lib/notify";
 import { sendUserPush } from "@/lib/push";
 import { AccountMenu } from "@/components/account-menu";
 import { cn } from "@/lib/utils";
-import { calendarDay, formatRange, noonUtc, spanDays } from "@/lib/dates";
+import { calendarDay, clockOf, formatRange, spanDays, withClock } from "@/lib/dates";
+import { googleAgendaUrl, saveOnPhoneCalendar } from "@/lib/agenda";
 
 const STOP_WORDS = new Set([
   "para", "com", "uma", "uns", "umas", "que", "das", "dos", "por", "nao", "ate", "dia", "dias",
@@ -201,8 +202,13 @@ function Agenda({
         ) : (
           <ul className="flex flex-col gap-2">
             {selectedTasks.map((task) => (
-              <li key={task.id} className="rounded-2xl bg-surface px-4 py-3 text-sm shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
-                {task.text}
+              <li key={task.id} className="flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-sm shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
+                <span className="min-w-0 truncate">{task.text}</span>
+                {googleAgendaUrl(task) ? (
+                  <a href={googleAgendaUrl(task) ?? "#"} className="shrink-0 text-xs text-accent">
+                    Agenda
+                  </a>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -525,7 +531,7 @@ function TaskBoard() {
         </div>
         {tab === "tarefas" && !task.done ? (
           <div className="mt-3 grid grid-cols-1 gap-2">
-            <label className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-2 text-xs text-subtle">
+            <label className="grid min-w-0 grid-cols-[2.75rem_minmax(0,1fr)_6.5rem] items-center gap-2 text-xs text-subtle">
               De
               <input
                 type="date"
@@ -534,8 +540,16 @@ function TaskBoard() {
                 onChange={(event) => spanChange(task, "start", event.target.value)}
                 className="task-date"
               />
+              <input
+                type="time"
+                aria-label={`Hora de começo de ${task.text}`}
+                value={clockOf(task.dueAt)}
+                disabled={!calendarDay(task.dueAt)}
+                onChange={(event) => spanChange(task, "startClock", event.target.value)}
+                className="task-date"
+              />
             </label>
-            <label className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-2 text-xs text-subtle">
+            <label className="grid min-w-0 grid-cols-[2.75rem_minmax(0,1fr)_6.5rem] items-center gap-2 text-xs text-subtle">
               Até
               <input
                 type="date"
@@ -544,26 +558,55 @@ function TaskBoard() {
                 onChange={(event) => spanChange(task, "end", event.target.value)}
                 className="task-date"
               />
+              <input
+                type="time"
+                aria-label={`Hora de fim de ${task.text}`}
+                value={clockOf(task.endsAt)}
+                disabled={!calendarDay(task.endsAt ?? task.dueAt)}
+                onChange={(event) => spanChange(task, "endClock", event.target.value)}
+                className="task-date"
+              />
             </label>
+            {calendarDay(task.dueAt) ? (
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href={googleAgendaUrl(task) ?? "#"}
+                  className="inline-flex h-11 items-center justify-center rounded-lg bg-surface-2 px-2 text-center text-xs text-fg"
+                >
+                  Google Agenda
+                </a>
+                <button
+                  type="button"
+                  onClick={() => saveOnPhoneCalendar(task)}
+                  className="h-11 rounded-lg bg-surface-2 px-2 text-xs text-fg"
+                >
+                  No celular
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </li>
     );
   };
 
-  const spanChange = (task: TaskRow, which: "start" | "end", day: string) => {
+  const spanChange = (task: TaskRow, which: "start" | "end" | "startClock" | "endClock", value: string) => {
     let start = calendarDay(task.dueAt);
     let end = calendarDay(task.endsAt ?? task.dueAt);
-    if (which === "start") start = day;
-    else end = day;
+    let startClock = clockOf(task.dueAt);
+    let endClock = clockOf(task.endsAt);
+    if (which === "start") start = value;
+    else if (which === "end") end = value;
+    else if (which === "startClock") startClock = value;
+    else endClock = value;
     if (start && end && end < start) {
       if (which === "start") end = start;
-      else start = end;
+      else if (which === "end") start = end;
     }
     if (!start && end) start = end;
     if (start && !end) end = start;
-    const startAt = start ? noonUtc(start) : null;
-    const endAt = end ? noonUtc(end) : null;
+    const startAt = start ? withClock(start, startClock) : null;
+    const endAt = end ? withClock(end, endClock) : null;
     const previous = tasksRef.current.find((item) => item.id === task.id);
     const next = tasksRef.current.map((item) => (item.id === task.id ? { ...item, dueAt: startAt, endsAt: endAt } : item));
     tasksRef.current = next;

@@ -4,8 +4,21 @@ export function calendarDay(iso: string | null | undefined) {
   return match?.[1] ?? "";
 }
 
+export function clockOf(iso: string | null | undefined) {
+  if (!iso) return "";
+  const match = iso.match(/(?:T|\s)(\d{2}:\d{2})/);
+  if (!match || match[1] === "12:00") return "";
+  return match[1];
+}
+
 export function noonUtc(day: string) {
   return `${day}T12:00:00.000Z`;
+}
+
+export function withClock(day: string, clock: string) {
+  if (!day) return null;
+  if (!/^\d{2}:\d{2}$/.test(clock)) return noonUtc(day);
+  return `${day}T${clock}:00.000Z`;
 }
 
 export function formatDayLabel(iso: string | null) {
@@ -23,8 +36,12 @@ export function formatRange(startIso: string | null, endIso: string | null) {
   const start = formatDayLabel(startIso);
   const end = formatDayLabel(endIso);
   if (!start) return null;
-  if (!end || start === end) return start;
-  return `${start} – ${end}`;
+  const startClock = clockOf(startIso);
+  const endClock = clockOf(endIso);
+  const startText = startClock ? `${start} ${startClock}` : start;
+  const endText = endClock ? `${end ?? start} ${endClock}` : end;
+  if (!endText || startText === endText) return startText;
+  return `${startText} – ${endText}`;
 }
 
 export function spanDays(startIso: string | null, endIso: string | null) {

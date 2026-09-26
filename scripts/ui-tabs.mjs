@@ -56,6 +56,12 @@ try {
       fail("o campo de data sai do cartão");
     }
   }
+  const agenda = card.getByRole("link", { name: "Google Agenda" });
+  await agenda.waitFor();
+  const href = await agenda.getAttribute("href");
+  if (!href?.includes("calendar.google.com") || (!href.includes("20261002%2F20261005") && !href.includes("20261002/20261005"))) {
+    fail(`link da agenda inesperado: ${href}`);
+  }
   await assertFits("Lista");
 
   await page.getByRole("button", { name: "Calendário" }).click();
