@@ -39,7 +39,15 @@ function Configuracoes() {
       <p className="mb-4 text-sm text-muted">Ajuste o dino e o jeito da lista.</p>
       <SettingGroup>
         <SettingRow title="Aparência" hint="Escuro é o padrão. Claro deixa o fundo claro.">
-          <div className="flex rounded-full border border-border bg-surface-2 p-0.5">
+          <div className="relative grid w-[148px] grid-cols-2 rounded-full border border-border bg-surface-2 p-0.5">
+            <span
+              aria-hidden
+              className={cn(
+                "pointer-events-none absolute top-0.5 bottom-0.5 left-0.5 w-[calc(50%-2px)] rounded-full bg-accent",
+                "transition-transform duration-300 ease-out motion-reduce:transition-none",
+                theme === "light" && "translate-x-full",
+              )}
+            />
             {(
               [
                 ["dark", "Escuro"],
@@ -52,8 +60,8 @@ function Configuracoes() {
                 aria-pressed={theme === value}
                 onClick={() => void patch({ theme: value satisfies ThemeMode })}
                 className={cn(
-                  "h-8 rounded-full px-3 text-xs font-medium",
-                  theme === value ? "bg-accent text-accent-fg" : "text-muted",
+                  "relative z-10 h-8 rounded-full text-xs font-medium transition-colors duration-300 ease-out",
+                  theme === value ? "text-accent-fg" : "text-muted",
                 )}
               >
                 {label}
