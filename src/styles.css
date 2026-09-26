@@ -20,8 +20,13 @@
   --radius-xl: 1.5rem;
 }
 
-html {
-  color-scheme: dark;
+html.theme-swap,
+html.theme-swap *,
+html.theme-swap *::before,
+html.theme-swap *::after {
+  transition-property: background-color, color, border-color, outline-color, fill, stroke, box-shadow !important;
+  transition-duration: 320ms !important;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
 html[data-theme="light"] {

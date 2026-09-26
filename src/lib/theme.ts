@@ -17,7 +17,15 @@ export function readStoredTheme(): ThemeMode {
 
 export function applyTheme(theme: ThemeMode) {
   if (typeof document === "undefined") return;
-  document.documentElement.dataset.theme = theme;
+  const root = document.documentElement;
+  const previous = root.dataset.theme;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (previous && previous !== theme && !reduce) {
+    root.classList.add("theme-swap");
+    void root.offsetHeight;
+    window.setTimeout(() => root.classList.remove("theme-swap"), 380);
+  }
+  root.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
   try {
     localStorage.setItem(KEY, theme);
