@@ -133,16 +133,15 @@ function Agenda({
 
   if (ready && groups.days.length === 0 && groups.open.length === 0) {
     return (
-      <div className="rounded-3xl bg-surface px-5 py-10 text-center shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
+      <div className="rounded-3xl bg-surface px-5 py-10 text-center shadow-card">
         <p className="text-sm text-muted">Nada no calendário</p>
-        <p className="mt-1 text-xs text-subtle">Na lista, escolha de que dia até que dia. Ela aparece aqui.</p>
       </div>
     );
   }
 
-  return (
-    <div className="flex flex-col gap-5 pb-28">
-      <section className="rounded-3xl bg-surface px-4 py-4 shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
+    return (
+      <div className="tab-pane flex flex-col gap-5 pb-28">
+      <section className="rounded-3xl bg-surface px-4 py-4 shadow-card">
         <div className="mb-4 flex items-center justify-between">
           <button type="button" className="px-2 text-lg text-muted" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))} aria-label="Mês anterior">
             ‹
@@ -202,7 +201,7 @@ function Agenda({
         ) : (
           <ul className="flex flex-col gap-2">
             {selectedTasks.map((task) => (
-              <li key={task.id} className="flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-sm shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
+              <li key={task.id} className="flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-sm shadow-card">
                 <span className="min-w-0 truncate">{task.text}</span>
                 {googleAgendaUrl(task) ? (
                   <a href={googleAgendaUrl(task) ?? "#"} className="shrink-0 text-xs text-accent">
@@ -424,7 +423,7 @@ function TaskBoard() {
     setTasks(ordered);
   };
 
-  const renderTask = (task: TaskRow) => {
+  const renderTask = (task: TaskRow, index = 0) => {
     const dueLabel = formatRange(task.dueAt, task.endsAt);
     const end = task.endsAt ?? task.dueAt;
     const endDay = calendarDay(end);
@@ -433,9 +432,10 @@ function TaskBoard() {
       <li
         key={task.id}
         data-task-id={task.id}
+        style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
         className={cn(
-          "overflow-hidden rounded-2xl border-l-4 bg-surface px-3 py-3 shadow-[0_8px_24px_rgba(60,40,20,0.05)]",
-          task.priority === "urgente" ? "border-danger" : task.priority === "depois" ? "border-accent" : "border-[#e4b423]",
+          "task-in overflow-hidden rounded-2xl border-l-4 bg-surface px-3 py-3 shadow-card",
+          task.priority === "urgente" ? "border-danger" : task.priority === "depois" ? "border-accent" : "border-warn",
           dragId === task.id && "opacity-40",
         )}
       >
@@ -494,7 +494,7 @@ function TaskBoard() {
           <span
             className={cn(
               "flex size-6 items-center justify-center rounded-md border",
-              task.done ? "border-accent bg-accent text-accent-fg" : "border-[#d9d3cb] bg-surface text-transparent",
+              task.done ? "border-accent bg-accent text-accent-fg" : "border-border bg-surface text-transparent",
             )}
           >
             <Check className="size-3.5" strokeWidth={3} />
@@ -511,7 +511,7 @@ function TaskBoard() {
         <span
           className={cn(
             "size-2 shrink-0 rounded-full",
-            task.done ? "bg-accent" : task.priority === "urgente" ? "bg-danger" : task.priority === "depois" ? "bg-accent" : "bg-[#e4b423]",
+            task.done ? "bg-accent" : task.priority === "urgente" ? "bg-danger" : task.priority === "depois" ? "bg-accent" : "bg-warn",
           )}
           aria-hidden="true"
         />
@@ -668,11 +668,6 @@ function TaskBoard() {
           ) : (
             <div>
               <h1 className="text-2xl font-semibold tracking-tight">{titles[tab]}</h1>
-              <p className="mt-1 text-xs text-subtle">
-                {tab === "hoje"
-                  ? "O período de cada tarefa aparece nos dias."
-                  : "As que você marcou como feitas."}
-              </p>
             </div>
           )}
           <AccountMenu />
@@ -718,7 +713,7 @@ function TaskBoard() {
                     type="button"
                     onClick={() => setGroup(group === item.id ? null : item.id)}
                     className={cn(
-                      "min-h-11 rounded-full px-3 text-xs",
+                      "min-h-11 rounded-full px-3 text-xs transition-colors duration-200",
                       group === item.id ? "bg-fg text-bg" : "bg-surface text-muted",
                     )}
                   >
@@ -739,7 +734,7 @@ function TaskBoard() {
                 ["Taxa", tasks.length ? `${Math.round((tasks.filter((task) => task.done).length / tasks.length) * 100)}%` : "0%"],
               ] as const
             ).map(([label, value]) => (
-              <div key={label} className="rounded-2xl bg-surface px-3 py-3 shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
+              <div key={label} className="rounded-2xl bg-surface px-3 py-3 shadow-card">
                 <p className="text-lg font-semibold">{value}</p>
                 <p className="text-[11px] text-subtle">{label}</p>
               </div>
@@ -751,13 +746,10 @@ function TaskBoard() {
           {tab === "hoje" ? (
             <Agenda groups={agendaGroups()} ready={ready} />
           ) : (
-            <ul className="flex flex-col gap-3 pb-28">
+            <ul key={tab} className="tab-pane flex flex-col gap-3 pb-28">
               {ready && visible.length === 0 ? (
                 <li className="rounded-xl border border-border bg-surface px-5 py-10 text-center">
                   <p className="text-sm text-muted">Nada por aqui</p>
-                  <p className="mt-1 text-xs text-subtle">
-                    {tab === "tarefas" ? "Escreve acima. O dia, se quiser, fica em cada tarefa." : "Quando concluir uma da lista, ela vem para cá."}
-                  </p>
                 </li>
               ) : (
                 visible.map(renderTask)

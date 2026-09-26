@@ -35,23 +35,22 @@ function Notificacoes() {
 
   return (
     <AuthScreen title="Notificações">
-      <p className="mb-4 text-sm text-muted">Tudo começa desligado. Ligue só o que você quer receber.</p>
       <SettingGroup>
-        <SettingRow title="Hoje" hint="Tarefas cujo período inclui o dia de hoje.">
+        <SettingRow title="Hoje">
           <Switch
             label="Hoje"
             checked={prefs?.notifyToday ?? false}
             onCheckedChange={(value) => void patch({ notifyToday: value })}
           />
         </SettingRow>
-        <SettingRow title="Atrasadas" hint="O período já terminou e a tarefa continua aberta.">
+        <SettingRow title="Atrasadas">
           <Switch
             label="Atrasadas"
             checked={prefs?.notifyLate ?? false}
             onCheckedChange={(value) => void patch({ notifyLate: value })}
           />
         </SettingRow>
-        <SettingRow title="Ao concluir" hint="Um aviso quando você marca a tarefa como feita.">
+        <SettingRow title="Ao concluir">
           <Switch
             label="Ao concluir"
             checked={prefs?.notifyDone ?? false}

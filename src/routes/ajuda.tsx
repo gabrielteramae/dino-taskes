@@ -33,7 +33,6 @@ const FAQS = [
 function Ajuda() {
   return (
     <AuthScreen title="Ajuda">
-      <p className="mb-4 text-sm text-muted">Em um minuto.</p>
       <SettingGroup>
         {FAQS.map((item) => (
           <SettingRow key={item.title} title={item.title} hint={item.hint} />

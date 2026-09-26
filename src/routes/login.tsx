@@ -136,11 +136,6 @@ function Login() {
         <h1 className="login-field text-3xl font-semibold tracking-tight" style={{ animationDelay: "40ms" }}>
           {mode === "signin" ? "Bem-vindo de volta" : "Crie sua conta"}
         </h1>
-        <p className="login-field mt-2 text-sm text-muted" style={{ animationDelay: "120ms" }}>
-          {mode === "signin"
-            ? "Entre para continuar nas suas tarefas."
-            : "Guarde a lista na sua conta, em qualquer aparelho."}
-        </p>
 
         {!authEnabled ? (
           <p className="mt-8 text-sm text-muted">Entrar está indisponível no momento.</p>

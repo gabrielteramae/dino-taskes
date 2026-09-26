@@ -36,9 +36,8 @@ function Configuracoes() {
 
   return (
     <AuthScreen title="Configurações">
-      <p className="mb-4 text-sm text-muted">Ajuste o jeito da lista.</p>
       <SettingGroup>
-        <SettingRow title="Aparência" hint="Escuro é o padrão. Claro deixa o fundo claro.">
+        <SettingRow title="Aparência">
           <div className="relative grid w-[148px] grid-cols-2 rounded-full border border-border bg-surface-2 p-0.5">
             <span
               aria-hidden
@@ -69,7 +68,7 @@ function Configuracoes() {
             ))}
           </div>
         </SettingRow>
-        <SettingRow title="Confirmar ao apagar" hint="Pede um ok antes de remover uma tarefa.">
+        <SettingRow title="Confirmar ao apagar">
           <Switch
             label="Confirmar ao apagar"
             checked={prefs?.confirmDelete ?? false}

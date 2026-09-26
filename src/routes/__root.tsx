@@ -93,12 +93,12 @@ function ThemeSync() {
 
 function Root() {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" data-theme="dark" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html:
-              '(function(){try{if(localStorage.getItem("dino-theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}})()',
+              '(function(){try{document.documentElement.setAttribute("data-theme",localStorage.getItem("dino-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}})()',
           }}
         />
         <HeadContent />

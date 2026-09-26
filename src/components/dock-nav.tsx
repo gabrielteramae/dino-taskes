@@ -25,11 +25,11 @@ export function DockNav({ tab, onChange }: { tab: DockTab; onChange: (tab: DockT
                 aria-current={active ? "page" : undefined}
                 onClick={() => onChange(item.id)}
                 className={cn(
-                  "flex h-14 min-w-16 flex-col items-center justify-center gap-0.5 rounded-2xl px-3 text-[11px]",
+                  "flex h-14 min-w-16 flex-col items-center justify-center gap-0.5 rounded-2xl px-3 text-[11px] transition-colors duration-200",
                   active ? "bg-surface-2 text-fg" : "text-subtle",
                 )}
               >
-                <Icon className="size-5" strokeWidth={2} />
+                <Icon className={cn("size-5 transition-transform duration-200", active && "scale-110")} strokeWidth={2} />
                 {item.label}
               </button>
             );

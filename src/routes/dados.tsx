@@ -44,21 +44,17 @@ function Dados() {
 
   return (
     <AuthScreen title="Dados salvos">
-      <p className="mb-4 text-sm text-muted">
-        Explorar persistência com banco de dados. A lista não fica só na tela: cada tarefa é uma linha
-        da sua conta. Recarregar a página não apaga.
-      </p>
       <SettingGroup>
-        <SettingRow title="Onde está salvo" hint="Troca para Postgres se existir DATABASE_URL.">
+        <SettingRow title="Onde está salvo">
           <span className="text-xs text-muted">{engine}</span>
         </SettingRow>
-        <SettingRow title="Tarefas gravadas" hint="Contagem lida agora, direto do SQL.">
+        <SettingRow title="Tarefas gravadas">
           <span className="text-xs text-fg">{snap ? snap.tasks : "…"}</span>
         </SettingRow>
-        <SettingRow title="Concluídas" hint="O mesmo filtro da aba Feitas.">
+        <SettingRow title="Concluídas">
           <span className="text-xs text-fg">{snap ? snap.done : "…"}</span>
         </SettingRow>
-        <SettingRow title="Com dia marcado" hint="As que você agendou.">
+        <SettingRow title="Com dia marcado">
           <span className="text-xs text-fg">{snap ? snap.scheduled : "…"}</span>
         </SettingRow>
         <SettingRow title="Última gravação">

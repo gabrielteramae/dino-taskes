@@ -53,20 +53,14 @@ function OAuth() {
 
   return (
     <AuthScreen title="Contas">
-      <p className="mb-4 text-sm text-muted">
-        Integrar autenticação com OAuth. O app não guarda a senha do Google. Você autoriza lá e volta
-        com uma sessão nesta conta.
-      </p>
-
       <SettingGroup>
         {accounts && accounts.length === 0 ? (
-          <SettingRow title="Nenhuma conta ligada" hint="Entra com e-mail ou com o Google." />
+          <SettingRow title="Nenhuma conta ligada" />
         ) : (
           accounts?.map((account) => (
             <SettingRow
               key={account.providerId}
               title={account.label}
-              hint={account.providerId === "credential" ? "Senha só nesta conta." : "Entrou por OAuth."}
             >
               <span className="text-xs text-subtle">{when(account.createdAt)}</span>
             </SettingRow>

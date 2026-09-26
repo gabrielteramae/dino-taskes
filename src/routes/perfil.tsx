@@ -64,7 +64,7 @@ function Perfil() {
             className="mt-2"
           />
         </div>
-        <SettingRow title="E-mail" hint="Usado só para entrar. Não aparece para outras pessoas.">
+        <SettingRow title="E-mail">
           <span className="max-w-[45%] truncate text-xs text-muted">{user?.primaryEmail ?? "—"}</span>
         </SettingRow>
       </SettingGroup>
