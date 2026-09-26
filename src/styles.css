@@ -65,11 +65,9 @@ html[data-theme="dark"] {
   html,
   body,
   #app {
-    height: var(--app-h, 100dvh);
+    min-height: 100%;
     min-height: 100dvh;
-    min-height: -webkit-fill-available;
     background: var(--color-bg);
-    overscroll-behavior: none;
     touch-action: manipulation;
   }
 
@@ -96,11 +94,8 @@ html[data-theme="dark"] {
 
 .app-frame {
   display: flex;
-  height: var(--app-h, 100dvh);
-  max-height: var(--app-h, 100dvh);
-  min-height: -webkit-fill-available;
+  min-height: 100dvh;
   flex-direction: column;
-  overflow: hidden;
   background: var(--color-bg);
 }
 
@@ -128,6 +123,22 @@ html[data-theme="dark"] {
   padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
   padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
   padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+}
+
+.task-date {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: var(--color-surface-2);
+  color: var(--color-fg);
+  padding: 0 0.6rem;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 @keyframes dino-bob {

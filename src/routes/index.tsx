@@ -193,7 +193,7 @@ function Agenda({
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 pb-28">
       <section className="rounded-3xl bg-surface px-4 py-4 shadow-[0_8px_24px_rgba(60,40,20,0.05)]">
         <div className="mb-4 flex items-center justify-between">
           <button type="button" className="px-2 text-lg text-muted" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))} aria-label="Mês anterior">
@@ -485,11 +485,12 @@ function TaskBoard() {
         key={task.id}
         data-task-id={task.id}
         className={cn(
-          "flex items-center gap-3 rounded-2xl border-l-4 bg-surface px-3 py-3 shadow-[0_8px_24px_rgba(60,40,20,0.05)]",
+          "overflow-hidden rounded-2xl border-l-4 bg-surface px-3 py-3 shadow-[0_8px_24px_rgba(60,40,20,0.05)]",
           task.priority === "urgente" ? "border-danger" : task.priority === "depois" ? "border-accent" : "border-[#e4b423]",
           dragId === task.id && "opacity-40",
         )}
       >
+        <div className="flex items-center gap-1">
         {tab === "tarefas" && !task.done ? (
           <button
             type="button"
@@ -551,40 +552,12 @@ function TaskBoard() {
           </span>
         </button>
         <span className="min-w-0 flex-1">
-          <span className={cn("block text-[15px] leading-snug", task.done && "text-subtle line-through")}>
+          <span className={cn("block truncate text-[15px] leading-snug", task.done && "text-subtle line-through")}>
             {task.text}
           </span>
-          <span className="mt-1 flex flex-wrap items-center gap-2">
-            {dueLabel ? (
-              <span className={cn("text-xs", overdue ? "text-danger" : "text-subtle")}>{dueLabel}</span>
-            ) : tab === "tarefas" ? (
-              <span className="text-xs text-subtle">Sem período</span>
-            ) : null}
+          <span className={cn("mt-0.5 block text-xs", overdue ? "text-danger" : "text-subtle")}>
+            {dueLabel || "Sem período"}
           </span>
-          {tab === "tarefas" && !task.done ? (
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <label className="flex flex-col gap-1 text-[11px] text-subtle">
-                De
-                <input
-                  type="date"
-                  aria-label={`Começo de ${task.text}`}
-                  value={dayValue(task.dueAt)}
-                  onChange={(event) => spanChange(task, "start", event.target.value)}
-                  className="h-11 w-full min-w-0 rounded-lg bg-surface-2 px-2 text-base text-fg"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-[11px] text-subtle">
-                Até
-                <input
-                  type="date"
-                  aria-label={`Fim de ${task.text}`}
-                  value={dayValue(task.endsAt ?? task.dueAt)}
-                  onChange={(event) => spanChange(task, "end", event.target.value)}
-                  className="h-11 w-full min-w-0 rounded-lg bg-surface-2 px-2 text-base text-fg"
-                />
-              </label>
-            </div>
-          ) : null}
         </span>
         <span
           className={cn(
@@ -601,6 +574,31 @@ function TaskBoard() {
         >
           <Trash2 className="size-4" />
         </Button>
+        </div>
+        {tab === "tarefas" && !task.done ? (
+          <div className="mt-3 grid grid-cols-1 gap-2">
+            <label className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-2 text-xs text-subtle">
+              De
+              <input
+                type="date"
+                aria-label={`Começo de ${task.text}`}
+                value={dayValue(task.dueAt)}
+                onChange={(event) => spanChange(task, "start", event.target.value)}
+                className="task-date"
+              />
+            </label>
+            <label className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-2 text-xs text-subtle">
+              Até
+              <input
+                type="date"
+                aria-label={`Fim de ${task.text}`}
+                value={dayValue(task.endsAt ?? task.dueAt)}
+                onChange={(event) => spanChange(task, "end", event.target.value)}
+                className="task-date"
+              />
+            </label>
+          </div>
+        ) : null}
       </li>
     );
   };
@@ -761,7 +759,7 @@ function TaskBoard() {
           {tab === "hoje" ? (
             <Agenda groups={agendaGroups()} ready={ready} />
           ) : (
-            <ul className="flex flex-col gap-3 pb-2">
+            <ul className="flex flex-col gap-3 pb-28">
               {ready && visible.length === 0 ? (
                 <li className="rounded-xl border border-border bg-surface px-5 py-10 text-center">
                   <p className="text-sm text-muted">Nada por aqui</p>
