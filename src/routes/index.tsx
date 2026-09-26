@@ -18,6 +18,7 @@ import {
   type TaskRow,
 } from "@/lib/tasks";
 import { getPrefs } from "@/lib/prefs";
+import { notifyDone, notifyDue } from "@/lib/notify";
 import { AccountMenu } from "@/components/account-menu";
 import { cn } from "@/lib/utils";
 
@@ -226,6 +227,7 @@ function TaskBoard() {
   const [ready, setReady] = useState(false);
   const [draft, setDraft] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [notifyOnDone, setNotifyOnDone] = useState(true);
   const [tab, setTab] = useState<DockTab>("tarefas");
   const [streak, setStreak] = useState(0);
   const [dragId, setDragId] = useState<string | null>(null);
@@ -243,10 +245,18 @@ function TaskBoard() {
 
   useEffect(() => {
     let cancelled = false;
+    let loaded: TaskRow[] | null = null;
+    let remind = false;
+    const ping = () => {
+      if (cancelled || !loaded || !remind) return;
+      notifyDue(loaded);
+    };
     listTasks()
       .then((rows) => {
         if (cancelled) return;
         setTasks(rows);
+        loaded = rows;
+        ping();
       })
       .catch((err) => {
         if (isUnauthorized(err) || cancelled) return;
@@ -258,6 +268,9 @@ function TaskBoard() {
       .then((p) => {
         if (cancelled) return;
         setConfirmDelete(p.confirmDelete);
+        setNotifyOnDone(p.notifyDone);
+        remind = p.notifyDino;
+        ping();
       })
       .catch(() => undefined);
     void getStreak()
@@ -304,9 +317,12 @@ function TaskBoard() {
   };
 
   const toggle = async (id: string) => {
+    const current = tasksRef.current.find((task) => task.id === id);
+    const willDone = !current?.done;
     const next = tasksRef.current.map((task) => (task.id === id ? { ...task, done: !task.done } : task));
     tasksRef.current = next;
     setTasks(next);
+    if (willDone && notifyOnDone && current) notifyDone(id, current.text);
     chain(id, async () => {
       const desired = tasksRef.current.find((task) => task.id === id)?.done;
       if (desired === undefined) return;
