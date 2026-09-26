@@ -5,7 +5,7 @@ import { ChevronLeft } from "lucide-react";
 export function LegalScreen({ title, children }: { title: string; children: ReactNode }) {
   return (
     <main className="min-h-dvh bg-bg text-fg">
-      <div className="mx-auto w-full max-w-lg px-5 pt-10 pb-16">
+      <div className="page-shell mx-auto w-full max-w-lg">
         <header className="mb-8 flex items-center gap-2">
           <Link
             to="/"

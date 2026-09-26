@@ -106,7 +106,7 @@ export function CookieConsent() {
     <div
       role="dialog"
       aria-labelledby="cookie-banner-title"
-      className="cookie-banner fixed inset-x-3 bottom-24 z-50 mx-auto max-w-lg rounded-2xl border border-border bg-surface p-4 shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
+      className="cookie-banner fixed inset-x-3 z-50 mx-auto max-w-lg rounded-2xl border border-border bg-surface p-4 shadow-[0_12px_40px_rgba(0,0,0,0.45)] bottom-[calc(5.75rem+env(safe-area-inset-bottom))]"
     >
       <p id="cookie-banner-title" className="text-sm font-medium text-fg">
         Cookies

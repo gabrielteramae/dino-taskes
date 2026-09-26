@@ -95,7 +95,7 @@ function Login() {
 
   return (
     <main className="login-glow relative min-h-dvh overflow-hidden bg-bg text-fg">
-      <div className="login-rise relative mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-5 py-10">
+      <div className="page-shell login-rise relative mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center">
         <div className="login-card">
         <h1 className="login-field text-3xl font-semibold tracking-tight" style={{ animationDelay: "40ms" }}>
           {mode === "signin" ? "Bem-vindo de volta" : "Crie sua conta"}

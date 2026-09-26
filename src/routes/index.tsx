@@ -529,7 +529,7 @@ function TaskBoard() {
               dragIdRef.current = null;
               setDragId(null);
             }}
-            className="grid size-10 shrink-0 touch-none place-items-center text-subtle"
+            className="grid size-11 shrink-0 touch-none place-items-center text-subtle"
           >
             <GripVertical className="size-4" />
           </button>
@@ -538,12 +538,16 @@ function TaskBoard() {
           type="button"
           onClick={() => void toggle(task.id)}
           aria-label={task.done ? "Desmarcar tarefa" : "Concluir tarefa"}
-          className={cn(
-            "flex size-6 shrink-0 items-center justify-center rounded-md border transition-colors duration-150",
-            task.done ? "border-accent bg-accent text-accent-fg" : "border-[#d9d3cb] bg-surface text-transparent",
-          )}
+          className="grid size-11 shrink-0 place-items-center"
         >
-          <Check className="size-3.5" strokeWidth={3} />
+          <span
+            className={cn(
+              "flex size-6 items-center justify-center rounded-md border",
+              task.done ? "border-accent bg-accent text-accent-fg" : "border-[#d9d3cb] bg-surface text-transparent",
+            )}
+          >
+            <Check className="size-3.5" strokeWidth={3} />
+          </span>
         </button>
         <span className="min-w-0 flex-1">
           <span className={cn("block text-[15px] leading-snug", task.done && "text-subtle line-through")}>
@@ -565,7 +569,7 @@ function TaskBoard() {
                   aria-label={`Começo de ${task.text}`}
                   value={dayValue(task.dueAt)}
                   onChange={(event) => spanChange(task, "start", event.target.value)}
-                  className="h-8 rounded-lg bg-surface-2 px-2 text-xs text-fg"
+                  className="h-11 w-full min-w-0 rounded-lg bg-surface-2 px-2 text-base text-fg"
                 />
               </label>
               <label className="flex flex-col gap-1 text-[11px] text-subtle">
@@ -575,7 +579,7 @@ function TaskBoard() {
                   aria-label={`Fim de ${task.text}`}
                   value={dayValue(task.endsAt ?? task.dueAt)}
                   onChange={(event) => spanChange(task, "end", event.target.value)}
-                  className="h-8 rounded-lg bg-surface-2 px-2 text-xs text-fg"
+                  className="h-11 w-full min-w-0 rounded-lg bg-surface-2 px-2 text-base text-fg"
                 />
               </label>
             </div>
@@ -657,7 +661,7 @@ function TaskBoard() {
 
   return (
     <main className="relative min-h-dvh bg-bg text-fg">
-      <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col px-5 pt-8 pb-36">
+      <div className="app-shell mx-auto flex min-h-dvh w-full max-w-lg flex-col">
         <header className="mb-5 flex items-center justify-between gap-3">
           {tab === "tarefas" ? (
             <div className="min-w-0">
