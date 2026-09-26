@@ -38,7 +38,7 @@ O front e as funções de servidor vivem no mesmo app. Sem `DATABASE_URL`, o ban
 | Tarefas | Escrever, concluir, apagar e reordenar |
 | Agenda | Ver o que foi criado e escolher o dia de cada uma |
 | Feitas | Lista do que já foi riscado |
-| Conta | Perfil, configurações, privacidade, notificações, ajuda e sair |
+| Conta | Perfil, banco de dados, OAuth, configurações, privacidade, notificações, ajuda e sair |
 
 O dino só aparece depois do login. Dá para arrastar ele pelo canto e o balão de fala não cobre os botões.
 
@@ -95,9 +95,9 @@ Variáveis opcionais:
 
 - **React 19 + TypeScript + Vite + Tailwind CSS 4** — interface escura, verde e pensada para o polegar
 - **TanStack Start** — rotas e funções de servidor
-- **Better Auth** — e-mail/senha e Google
+- **Better Auth** — e-mail/senha e Google (OAuth). A senha do Google não fica no app
 - **Zod** — validação do que entra na lista
-- **PGLite ou Postgres** — tarefas, dias e sequência de dias zerados
+- **PGLite ou Postgres** — tarefas, dias e sequência. A engrenagem abre o que está gravado no banco
 
 ## 🗺️ Relação com o desafio
 

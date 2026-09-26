@@ -4,6 +4,8 @@ import {
   Bell,
   CircleHelp,
   ChevronRight,
+  Database,
+  KeyRound,
   LogOut,
   Settings,
   Shield,
@@ -17,6 +19,8 @@ const subscribe = () => () => {};
 
 const ITEMS = [
   { to: "/perfil", label: "Perfil", icon: UserRound },
+  { to: "/dados", label: "Banco de dados", icon: Database },
+  { to: "/oauth", label: "OAuth", icon: KeyRound },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
   { to: "/privacidade", label: "Privacidade", icon: Shield },
   { to: "/notificacoes", label: "Notificações", icon: Bell },

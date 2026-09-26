@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AjudaRouteImport } from './routes/ajuda'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as DadosRouteImport } from './routes/dados'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
+import { Route as OauthRouteImport } from './routes/oauth'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -33,6 +35,11 @@ const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DadosRoute = DadosRouteImport.update({
+  id: '/dados',
+  path: '/dados',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -41,6 +48,11 @@ const LoginRoute = LoginRouteImport.update({
 const NotificacoesRoute = NotificacoesRouteImport.update({
   id: '/notificacoes',
   path: '/notificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthRoute = OauthRouteImport.update({
+  id: '/oauth',
+  path: '/oauth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -63,8 +75,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ajuda': typeof AjudaRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/dados': typeof DadosRoute
   '/login': typeof LoginRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/oauth': typeof OauthRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -73,8 +87,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ajuda': typeof AjudaRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/dados': typeof DadosRoute
   '/login': typeof LoginRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/oauth': typeof OauthRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -84,8 +100,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/ajuda': typeof AjudaRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/dados': typeof DadosRoute
   '/login': typeof LoginRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/oauth': typeof OauthRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -96,8 +114,10 @@ export interface FileRouteTypes {
     | '/'
     | '/ajuda'
     | '/configuracoes'
+    | '/dados'
     | '/login'
     | '/notificacoes'
+    | '/oauth'
     | '/perfil'
     | '/privacidade'
     | '/api/auth/$'
@@ -106,8 +126,10 @@ export interface FileRouteTypes {
     | '/'
     | '/ajuda'
     | '/configuracoes'
+    | '/dados'
     | '/login'
     | '/notificacoes'
+    | '/oauth'
     | '/perfil'
     | '/privacidade'
     | '/api/auth/$'
@@ -116,8 +138,10 @@ export interface FileRouteTypes {
     | '/'
     | '/ajuda'
     | '/configuracoes'
+    | '/dados'
     | '/login'
     | '/notificacoes'
+    | '/oauth'
     | '/perfil'
     | '/privacidade'
     | '/api/auth/$'
@@ -127,8 +151,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AjudaRoute: typeof AjudaRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
+  DadosRoute: typeof DadosRoute
   LoginRoute: typeof LoginRoute
   NotificacoesRoute: typeof NotificacoesRoute
+  OauthRoute: typeof OauthRoute
   PerfilRoute: typeof PerfilRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -157,6 +183,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfiguracoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dados': {
+      id: '/dados'
+      path: '/dados'
+      fullPath: '/dados'
+      preLoaderRoute: typeof DadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -169,6 +202,13 @@ declare module '@tanstack/react-router' {
       path: '/notificacoes'
       fullPath: '/notificacoes'
       preLoaderRoute: typeof NotificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth': {
+      id: '/oauth'
+      path: '/oauth'
+      fullPath: '/oauth'
+      preLoaderRoute: typeof OauthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -199,8 +239,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AjudaRoute: AjudaRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
+  DadosRoute: DadosRoute,
   LoginRoute: LoginRoute,
   NotificacoesRoute: NotificacoesRoute,
+  OauthRoute: OauthRoute,
   PerfilRoute: PerfilRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
