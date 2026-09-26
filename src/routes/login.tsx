@@ -77,7 +77,13 @@ function Login() {
   return (
     <main className="login-glow relative min-h-dvh overflow-hidden bg-bg text-fg">
       <div className="login-grid" aria-hidden="true" />
-      <div className="login-aurora" aria-hidden="true" />
+      <div className="gradient-mesh" aria-hidden="true">
+        <span className="mesh-node mesh-a" />
+        <span className="mesh-node mesh-b" />
+        <span className="mesh-node mesh-c" />
+        <span className="mesh-node mesh-d" />
+        <span className="mesh-node mesh-e" />
+      </div>
       <div className="login-beam login-beam-a" aria-hidden="true" />
       <div className="login-beam login-beam-b" aria-hidden="true" />
       <div className="login-rise relative mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-5 py-10">

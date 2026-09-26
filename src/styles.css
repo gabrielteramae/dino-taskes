@@ -183,16 +183,69 @@ html[data-theme="dark"] input[type="date"] {
   pointer-events: none;
 }
 
-.login-aurora {
+.gradient-mesh {
   position: absolute;
-  inset: -30% -10%;
-  background:
-    radial-gradient(38% 32% at 28% 28%, color-mix(in oklab, var(--color-accent) 55%, transparent), transparent 70%),
-    radial-gradient(32% 28% at 72% 38%, color-mix(in oklab, #7dcea0 40%, transparent), transparent 72%),
-    radial-gradient(28% 24% at 48% 78%, color-mix(in oklab, #e4b423 32%, transparent), transparent 70%);
-  filter: blur(28px);
-  animation: login-aurora 14s ease-in-out infinite alternate;
+  inset: -12%;
   pointer-events: none;
+}
+
+.mesh-node {
+  position: absolute;
+  width: 48%;
+  aspect-ratio: 1;
+  border-radius: 46% 54% 48% 52%;
+  filter: blur(34px);
+  animation: mesh-drift 16s ease-in-out infinite alternate;
+}
+
+.mesh-a {
+  top: -6%;
+  left: -8%;
+  background: color-mix(in oklab, var(--color-accent) 80%, white);
+}
+
+.mesh-b {
+  top: 8%;
+  right: -14%;
+  background: #9ed9ae;
+  animation-delay: -5s;
+}
+
+.mesh-c {
+  bottom: -8%;
+  left: 18%;
+  background: #e4b423;
+  opacity: 0.55;
+  animation-delay: -9s;
+}
+
+.mesh-d {
+  top: 38%;
+  left: 28%;
+  width: 34%;
+  background: #1f7a3a;
+  opacity: 0.4;
+  animation-delay: -3s;
+}
+
+.mesh-e {
+  right: 6%;
+  bottom: 16%;
+  width: 28%;
+  background: color-mix(in oklab, var(--color-bg) 40%, white);
+  opacity: 0.7;
+  animation-delay: -7s;
+}
+
+@keyframes mesh-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+    border-radius: 46% 54% 48% 52%;
+  }
+  to {
+    transform: translate3d(6%, -5%, 0) scale(1.12);
+    border-radius: 58% 42% 52% 48%;
+  }
 }
 
 .login-beam {
@@ -246,15 +299,6 @@ html[data-theme="dark"] input[type="date"] {
   pointer-events: none;
 }
 
-@keyframes login-aurora {
-  from {
-    transform: translate3d(-3%, -2%, 0) scale(1);
-  }
-  to {
-    transform: translate3d(4%, 3%, 0) scale(1.06);
-  }
-}
-
 @keyframes login-beam {
   from {
     transform: translateX(-30%);
@@ -294,7 +338,8 @@ html[data-theme="dark"] input[type="date"] {
   .dino-pop,
   .bubble-in,
   .cookie-banner,
-  .login-aurora,
+  .gradient-mesh,
+  .mesh-node,
   .login-beam,
   .login-rise,
   .login-submit::after {
