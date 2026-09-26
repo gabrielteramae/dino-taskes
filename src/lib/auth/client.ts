@@ -188,6 +188,7 @@ function waitForPopupToken(popup: Window): Promise<string | null> {
     const origin = window.location.origin;
     let settled = false;
     let closeTimer: number | undefined;
+    let sawOpen = false;
     const settle = (token: string | null) => {
       if (settled) return;
       settled = true;
@@ -198,14 +199,29 @@ function waitForPopupToken(popup: Window): Promise<string | null> {
       if (event.origin !== origin) return;
       const data = event.data as PopupMessage | undefined;
       if (!data || data.source !== "grok-auth-popup") return;
+      if (data.token) setBearerToken(data.token);
       settle(data.token ?? null);
     };
-    // Fallback when the user dismisses the popup. Grace period lets the
-    // completion page's postMessage win over a racing `popup.closed`.
+    // Phones often report the Google window as closed while the person is still
+    // signing in, and drop window.opener on the way back. Only treat a close as
+    // cancel after the window was actually open, and accept a token saved by the
+    // return page even if the message never arrives.
     const pollTimer = window.setInterval(() => {
-      if (!popup.closed) return;
+      const saved = getBearerToken();
+      if (saved) {
+        settle(saved);
+        return;
+      }
+      let closed = false;
+      try {
+        closed = popup.closed;
+      } catch {
+        closed = false;
+      }
+      if (!closed) sawOpen = true;
+      if (!sawOpen || !closed) return;
       window.clearInterval(pollTimer);
-      closeTimer = window.setTimeout(() => settle(null), 400);
+      closeTimer = window.setTimeout(() => settle(getBearerToken()), 1500);
     }, 300);
     function cleanup() {
       window.clearInterval(pollTimer);

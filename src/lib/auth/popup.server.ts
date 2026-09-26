@@ -148,9 +148,23 @@ function completionHtml(message: PopupMessage): string {
   var msg = { source: "grok-auth-popup", token: null };
   try { if (el && el.textContent) msg = JSON.parse(el.textContent); } catch (e) {}
   try {
-    if (window.opener) window.opener.postMessage(msg, window.location.origin);
+    if (msg.token) localStorage.setItem("grok-auth.bearer-token", msg.token);
   } catch (e) {}
+  var posted = false;
+  try {
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage(msg, window.location.origin);
+      posted = true;
+    }
+  } catch (e) {}
+  if (!posted) {
+    location.replace(msg.token ? "/" : "/login?erro=google");
+    return;
+  }
   try { window.close(); } catch (e) {}
+  setTimeout(function () {
+    location.replace(msg.token ? "/" : "/login?erro=google");
+  }, 500);
 })();
 </script>
 </body>

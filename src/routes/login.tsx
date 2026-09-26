@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { GROK_PROVIDERS, authClient, authEnabled, keepSignedIn, signIn } from "@/lib/auth/client";
+import { GROK_PROVIDERS, authClient, authEnabled, getBearerToken, keepSignedIn, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,31 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("erro") === "google") {
+      setError("Não foi possível entrar com o Google. Tente de novo.");
+    }
+    let gone = false;
+    const resume = () => {
+      if (gone || !getBearerToken()) return;
+      void authClient.getSession().then(({ data }) => {
+        if (!gone && data?.user) window.location.replace("/");
+      });
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") resume();
+    };
+    resume();
+    window.addEventListener("pageshow", resume);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      gone = true;
+      window.removeEventListener("pageshow", resume);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, []);
 
   if (isPending) {
     return (
@@ -169,7 +194,12 @@ function Login() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => signIn(GOOGLE.providerId, { callbackURL: "/" })}
+                  onClick={() => {
+                    setError("");
+                    void signIn(GOOGLE.providerId, { callbackURL: "/" }).catch(() => {
+                      setError("Não foi possível entrar com o Google. Tente de novo.");
+                    });
+                  }}
                   className={cn(
                     "inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-border bg-surface text-sm text-fg",
                     "transition-transform duration-150 ease-out hover:bg-surface-2 active:scale-[0.96]",
