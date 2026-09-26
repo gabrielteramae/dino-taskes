@@ -85,7 +85,7 @@ function Login() {
         <p className="mt-2 text-sm text-muted">
           {mode === "signin"
             ? "Entre para continuar nas suas tarefas."
-            : "Guarde a lista com o fantasma, em qualquer aparelho."}
+            : "Guarde a lista na sua conta, em qualquer aparelho."}
         </p>
 
         {!authEnabled ? (

@@ -60,7 +60,7 @@ function Perfil() {
             value={name}
             maxLength={40}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Como o fantasma te chama"
+            placeholder="Seu nome"
             className="mt-2"
           />
         </div>

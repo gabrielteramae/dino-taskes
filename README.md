@@ -6,7 +6,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38BDF8?style=flat&logo=tailwindcss&logoColor=white)
 ![Status](https://img.shields.io/badge/status-testado%20no%20browser-brightgreen?style=flat)
 
-Lista de tarefas para celular, com um fantasma branco que fica na tela e reage ao que você faz. Você escreve a tarefa, escolhe o dia na agenda e o mascote comemora, pensa ou cochila junto.
+Lista de tarefas para celular. Você escreve a tarefa, escolhe o dia na agenda e marca o que já fez.
 
 ## 🧠 Por que este exemplo
 
@@ -14,7 +14,7 @@ Uma lista comum vira portfólio quando a interface responde na hora e tem person
 
 - **Ação otimista** — criar, concluir e apagar atualizam a tela antes do servidor confirmar
 - **Estado por pessoa** — cada conta vê só as próprias tarefas
-- **Companhia na interface** — o fantasma muda de pose (oi, pensando, comemorando, dormindo) sem sair do lugar
+- **Agenda** — cada tarefa pode ter um dia, e a lista agrupa por data
 
 ## 🏗️ Arquitetura
 
@@ -40,7 +40,7 @@ O front e as funções de servidor vivem no mesmo app. Sem `DATABASE_URL`, o ban
 | Feitas | Lista do que já foi riscado |
 | Conta | Perfil, dados salvos, contas, configurações, privacidade, notificações, ajuda e sair |
 
-O fantasma só aparece depois do login. Dá para arrastar ele pelo canto e o balão de fala não cobre os botões.
+Dá para arrastar as tarefas para mudar a ordem.
 
 ## ✅ Testado no browser
 
@@ -50,7 +50,7 @@ Fluxo conferido com o app rodando (`npm run dev`), inclusive no tamanho de celul
 - Adicionar tarefa e ver o emoji ao lado do texto
 - Abrir a Agenda e marcar o dia
 - Trocar de aba na barra de baixo (Tarefas, Agenda, Feitas)
-- Mascote do mesmo tamanho em todas as poses, inclusive cochilando
+- Tarefas do mesmo jeito em claro e escuro
 
 ## 🚀 Como rodar
 
@@ -101,7 +101,7 @@ Variáveis opcionais:
 
 ## 🗺️ Relação com o desafio
 
-Este projeto é um gestor de tarefas simples, no tamanho de um app de celular: escrever, marcar o dia e riscar. O diferencial de portfólio é o mascote, que reage sem atrapalhar o toque.
+Este projeto é um gestor de tarefas simples, no tamanho de um app de celular: escrever, marcar o dia e riscar.
 
 ---
 

@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, GripVertical, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DinoCompanion, type DinoMood } from "@/components/dino-companion";
 import { DockNav, type DockTab } from "@/components/dock-nav";
 import { RedirectToSignIn } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
@@ -23,25 +22,6 @@ import { AccountMenu } from "@/components/account-menu";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({ component: Home });
-
-const LINES = {
-  hello: [
-    "Oi! Eu sou o fantasma. Clica em mim ou me arrasta.",
-    "Bora organizar o dia? Eu fico de olho.",
-  ],
-  add: ["Anotado. Vamos nessa.", "Boa. Mais uma na lista.", "Deixa comigo, eu lembro."],
-  done: ["Mandou bem.", "Riscou! Continua assim.", "Isso. Uma a menos."],
-  allDone: ["Lista zerada. Merece um descanso.", "Tudo feito. Eu também vou cochilar."],
-  remove: ["Tirei. Sem problema.", "Ok, essa saiu da lista."],
-  pet: ["Hehe. Faz cócegas.", "Gostei. De novo?", "Sou só um fantasma fofo mesmo."],
-  think: ["Hmm, o que vem agora?", "Escreve, eu estou prestando atenção."],
-  idle: [
-    "Se quiser, me arrasta pelo canto da tela.",
-    "Marca as tarefas. Eu comemoro cada uma.",
-    "Estou aqui se precisar.",
-  ],
-  sleep: ["Zz… me chama se precisar.", "Cochilando. Clica em mim."],
-};
 
 const EMOJI_RULES: Array<{ keys: string[]; emoji: string }> = [
   { keys: ["cafe", "coffee"], emoji: "☕" },
@@ -77,10 +57,6 @@ function emojiForTask(text: string) {
     if (rule.keys.some((k) => n.includes(k))) return rule.emoji;
   }
   return "📝";
-}
-
-function pick(list: string[]) {
-  return list[Math.floor(Math.random() * list.length)] ?? list[0] ?? "";
 }
 
 function isUnauthorized(err: unknown) {
@@ -196,18 +172,10 @@ function TaskBoard() {
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [ready, setReady] = useState(false);
   const [draft, setDraft] = useState("");
-  const [mood, setMood] = useState<DinoMood>("wave");
-  const [message, setMessage] = useState(LINES.hello[0]!);
-  const [dinoTalks, setDinoTalks] = useState(true);
-  const [dinoSmall, setDinoSmall] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [notifyDone, setNotifyDone] = useState(true);
-  const [notifyDino, setNotifyDino] = useState(true);
   const [tab, setTab] = useState<DockTab>("tarefas");
   const [streak, setStreak] = useState(0);
   const [dragId, setDragId] = useState<string | null>(null);
-  const idleTimer = useRef<number | null>(null);
-  const sleepTimer = useRef<number | null>(null);
   const tasksRef = useRef(tasks);
   tasksRef.current = tasks;
   const orderRef = useRef<string[] | null>(null);
@@ -220,35 +188,15 @@ function TaskBoard() {
     tails.current.set(id, next);
   };
 
-  const speak = (nextMood: DinoMood, nextMessage: string) => {
-    setMood(nextMood);
-    setMessage(dinoTalks ? nextMessage : "");
-    if (idleTimer.current) window.clearTimeout(idleTimer.current);
-    if (sleepTimer.current) window.clearTimeout(sleepTimer.current);
-    if (!notifyDino) return;
-    idleTimer.current = window.setTimeout(() => {
-      setMood("idle");
-      setMessage(dinoTalks ? pick(LINES.idle) : "");
-    }, 4200);
-    sleepTimer.current = window.setTimeout(() => {
-      setMood("sleep");
-      setMessage(dinoTalks ? pick(LINES.sleep) : "");
-    }, 18000);
-  };
-
   useEffect(() => {
     let cancelled = false;
     listTasks()
       .then((rows) => {
         if (cancelled) return;
         setTasks(rows);
-        if (rows.some((task) => !task.done && (isSameDay(task.dueAt) || (task.dueAt && new Date(task.dueAt) < new Date())))) {
-          speak("think", "Tem coisa pra hoje. Não esquece.");
-        }
       })
       .catch((err) => {
         if (isUnauthorized(err) || cancelled) return;
-        speak("think", "Não consegui carregar agora.");
       })
       .finally(() => {
         if (!cancelled) setReady(true);
@@ -256,11 +204,7 @@ function TaskBoard() {
     void getPrefs()
       .then((p) => {
         if (cancelled) return;
-        setDinoTalks(p.dinoTalks);
-        setDinoSmall(p.dinoSmall);
         setConfirmDelete(p.confirmDelete);
-        setNotifyDone(p.notifyDone);
-        setNotifyDino(p.notifyDino);
       })
       .catch(() => undefined);
     void getStreak()
@@ -268,11 +212,8 @@ function TaskBoard() {
         if (!cancelled) setStreak(row.streak);
       })
       .catch(() => undefined);
-    speak("wave", pick(LINES.hello));
     return () => {
       cancelled = true;
-      if (idleTimer.current) window.clearTimeout(idleTimer.current);
-      if (sleepTimer.current) window.clearTimeout(sleepTimer.current);
     };
   }, []);
 
@@ -280,10 +221,7 @@ function TaskBoard() {
 
   const add = async () => {
     const text = draft.trim();
-    if (!text) {
-      speak("think", "Escreve alguma coisa primeiro.");
-      return;
-    }
+    if (!text) return;
     setDraft("");
     const id = crypto.randomUUID();
     const temp: TaskRow = {
@@ -297,7 +235,6 @@ function TaskBoard() {
     };
     tasksRef.current = [temp, ...tasksRef.current];
     setTasks(tasksRef.current);
-    speak("celebrate", pick(LINES.add));
     chain(id, async () => {
       const local = tasksRef.current.find((task) => task.id === id);
       if (!local) return;
@@ -311,21 +248,14 @@ function TaskBoard() {
         tasksRef.current = tasksRef.current.filter((task) => task.id !== id);
         setTasks(tasksRef.current);
         setDraft(text);
-        speak("shy", "Essa não entrou. Tenta de novo.");
       }
     });
   };
 
   const toggle = async (id: string) => {
-    const current = tasks.find((t) => t.id === id);
-    const willDone = !current?.done;
-    const left = tasks.filter((t) => (t.id === id ? !willDone : !t.done)).length;
     const next = tasksRef.current.map((task) => (task.id === id ? { ...task, done: !task.done } : task));
     tasksRef.current = next;
     setTasks(next);
-    if (willDone && left === 0) speak("celebrate", pick(LINES.allDone));
-    else if (willDone) speak("celebrate", notifyDone ? pick(LINES.done) : "");
-    else speak("think", "Voltou pra lista. Sem pressa.");
     chain(id, async () => {
       const desired = tasksRef.current.find((task) => task.id === id)?.done;
       if (desired === undefined) return;
@@ -335,7 +265,6 @@ function TaskBoard() {
         if (desired && tasksRef.current.every((task) => task.done)) {
           const cleared = await recordClear().catch(() => null);
           if (cleared) setStreak(cleared.streak);
-          if (cleared && cleared.streak > 1) speak("celebrate", `Lista zerada. ${cleared.streak} dias seguidos.`);
         }
       } catch (err) {
         if (isUnauthorized(err)) return;
@@ -344,7 +273,6 @@ function TaskBoard() {
           tasksRef.current = rows;
           setTasks(rows);
         }
-        speak("shy", "Não rolou agora.");
       }
     });
   };
@@ -355,7 +283,6 @@ function TaskBoard() {
     const next = snapshot.filter((task) => task.id !== id);
     tasksRef.current = next;
     setTasks(next);
-    speak("shy", pick(LINES.remove));
     chain(id, async () => {
       try {
         await removeTask({ data: { id } });
@@ -369,7 +296,6 @@ function TaskBoard() {
           tasksRef.current = snapshot;
           setTasks(snapshot);
         }
-        speak("think", "Não consegui apagar.");
       }
     });
   };
@@ -385,7 +311,6 @@ function TaskBoard() {
       await reorderTasks({ data: { ids } });
     } catch (err) {
       if (isUnauthorized(err)) return;
-      speak("think", "Não consegui reordenar.");
     }
   };
 
@@ -516,7 +441,6 @@ function TaskBoard() {
     const next = tasksRef.current.map((task) => (task.id === id ? { ...task, dueAt } : task));
     tasksRef.current = next;
     setTasks(next);
-    speak(dueAt ? "think" : "idle", dueAt ? "Dia marcado." : "Tirei o dia dessa.");
     chain(id, async () => {
       const current = tasksRef.current.find((task) => task.id === id)?.dueAt ?? null;
       try {
@@ -526,7 +450,6 @@ function TaskBoard() {
         const restored = tasksRef.current.map((task) => (task.id === id ? { ...task, dueAt: previous } : task));
         tasksRef.current = restored;
         setTasks(restored);
-        speak("shy", "Não consegui marcar o dia.");
       }
     });
   };
@@ -555,7 +478,7 @@ function TaskBoard() {
             <p className="mt-2 text-sm text-muted">
               {ready
                 ? remaining === 0
-                  ? "Nada pendente. O fantasma está de boa."
+                  ? "Nada pendente."
                   : `${remaining} pendente${remaining === 1 ? "" : "s"}`
                 : "Carregando…"}
               {streak > 0 ? ` · ${streak} dia${streak === 1 ? "" : "s"} seguido${streak === 1 ? "" : "s"}` : ""}
@@ -576,12 +499,7 @@ function TaskBoard() {
               <Input
                 value={draft}
                 maxLength={80}
-                onChange={(event) => {
-                  setDraft(event.target.value);
-                  if (event.target.value.trim() && mood !== "think") {
-                    speak("think", pick(LINES.think));
-                  }
-                }}
+                onChange={(event) => setDraft(event.target.value)}
                 placeholder="O que precisa ser feito?"
                 aria-label="Nova tarefa"
               />
@@ -600,7 +518,7 @@ function TaskBoard() {
               <li className="rounded-xl border border-border bg-surface px-5 py-10 text-center">
                 <p className="text-sm text-muted">Nada por aqui</p>
                 <p className="mt-1 text-xs text-subtle">
-                  {tab === "tarefas" ? "Escreve acima. O fantasma reage." : "Troca de aba ou cria uma tarefa."}
+                  {tab === "tarefas" ? "Escreve acima para começar." : "Troca de aba ou cria uma tarefa."}
                 </p>
               </li>
             ) : (
@@ -610,13 +528,6 @@ function TaskBoard() {
         )}
       </div>
 
-      <DinoCompanion
-        size={dinoSmall ? "sm" : "md"}
-        bottomInset={128}
-        mood={mood}
-        message={dinoTalks ? message : ""}
-        onPet={() => speak("shy", pick(LINES.pet))}
-      />
       <DockNav tab={tab} onChange={setTab} />
     </main>
   );

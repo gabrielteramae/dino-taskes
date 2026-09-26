@@ -6,15 +6,15 @@ export const Route = createFileRoute("/ajuda")({ component: Ajuda });
 const FAQS = [
   {
     title: "Como adiciono uma tarefa?",
-    hint: "Escreve no campo e toca no +. O fantasma anota e reage.",
+    hint: "Escreve no campo e toca no +.",
   },
   {
     title: "Como marco como feita?",
     hint: "Toca no quadradinho à esquerda. Toca de novo se quiser desfazer.",
   },
   {
-    title: "O que o fantasma faz?",
-    hint: "Clica nele, arrasta pelo canto e ele olha o ponteiro. Só aparece depois do login.",
+    title: "Como reordeno?",
+    hint: "Na aba Tarefas, segura o ícone de linhas e arrasta a tarefa.",
   },
   {
     title: "Os emojis?",

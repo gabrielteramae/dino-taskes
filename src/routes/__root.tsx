@@ -17,7 +17,7 @@ export const Route = createRootRoute({
       { name: "theme-color", content: "#09090b" },
       {
         name: "description",
-        content: "Lista de tarefas simples com um fantasma que interage com você.",
+        content: "Lista de tarefas simples para o celular.",
       },
     ],
     links: [
