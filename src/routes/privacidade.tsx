@@ -98,6 +98,36 @@ function Privacidade() {
         Encerrar sessão neste aparelho
       </Button>
 
+      <p className="mt-6 mb-2 text-sm text-fg">Cookies de terceiros</p>
+      <ul className="overflow-hidden rounded-xl border border-border bg-surface">
+        <li className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 text-sm">
+          <span>
+            <span className="block text-fg">Google Fonts</span>
+            <span className="mt-0.5 block text-xs text-subtle">Só a fonte da tela. Dá para bloquear.</span>
+          </span>
+          <span className="shrink-0 text-xs text-subtle">{current.thirdParty ? "Permitido" : "Bloqueado"}</span>
+        </li>
+        <li className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+          <span>
+            <span className="block text-fg">Google, no login</span>
+            <span className="mt-0.5 block text-xs text-subtle">Os cookies ficam no site do Google. Este app não lê nem apaga.</span>
+          </span>
+          <span className="shrink-0 text-xs text-subtle">Fora daqui</span>
+        </li>
+      </ul>
+      <div className="mt-3 flex gap-2">
+        <Button
+          variant="ghost"
+          className="flex-1 border border-border"
+          onClick={() => commitConsent({ ...current, thirdParty: false })}
+        >
+          Bloquear terceiros
+        </Button>
+        <Button className="flex-1" onClick={() => commitConsent({ ...current, thirdParty: true })}>
+          Permitir terceiros
+        </Button>
+      </div>
+
       <p className="mt-6 mb-2 text-sm text-fg">Outros cookies</p>
       <ul className="overflow-hidden rounded-xl border border-border bg-surface">
         {cookies.length === 0 ? (
@@ -140,7 +170,7 @@ function Privacidade() {
         <Button
           className="flex-1"
           onClick={() => {
-            commitConsent({ preferences: true, analytics: true, marketing: true });
+            commitConsent({ preferences: true, analytics: true, marketing: true, thirdParty: true });
             setCookies(listCookies());
             setStored(listLocalStorage());
           }}

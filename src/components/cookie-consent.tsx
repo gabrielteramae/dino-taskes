@@ -17,6 +17,7 @@ const listeners = new Set<() => void>();
 
 function emit() {
   for (const listener of listeners) listener();
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("cookie-consent"));
 }
 
 function subscribe(listener: () => void) {
@@ -51,6 +52,7 @@ const CATEGORIES: Array<{ key: keyof Consent; title: string; hint: string }> = [
   { key: "preferences", title: "Preferências", hint: "Tema claro ou escuro neste aparelho." },
   { key: "analytics", title: "Análise", hint: "Não usamos hoje." },
   { key: "marketing", title: "Marketing", hint: "Não usamos hoje." },
+  { key: "thirdParty", title: "Terceiros", hint: "Fonte do Google. O login do Google fica no site deles." },
 ];
 
 export function ConsentSwitches({

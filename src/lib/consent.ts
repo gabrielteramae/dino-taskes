@@ -5,12 +5,13 @@ export type Consent = {
   preferences: boolean;
   analytics: boolean;
   marketing: boolean;
+  thirdParty: boolean;
 };
 
 export { CONSENT_STORAGE_KEY };
 
-export const CONSENT_OFF: Consent = { preferences: false, analytics: false, marketing: false };
-export const CONSENT_ON: Consent = { preferences: true, analytics: true, marketing: true };
+export const CONSENT_OFF: Consent = { preferences: false, analytics: false, marketing: false, thirdParty: false };
+export const CONSENT_ON: Consent = { preferences: true, analytics: true, marketing: true, thirdParty: true };
 
 export function parseConsent(raw: string | null): Consent | null {
   if (!raw) return null;
@@ -19,10 +20,12 @@ export function parseConsent(raw: string | null): Consent | null {
   try {
     const data = JSON.parse(raw) as Partial<Consent>;
     if (typeof data.preferences !== "boolean") return null;
+    const everythingElse = data.preferences && data.analytics === true && data.marketing === true;
     return {
       preferences: data.preferences,
       analytics: data.analytics === true,
       marketing: data.marketing === true,
+      thirdParty: data.thirdParty === true || (data.thirdParty === undefined && everythingElse),
     };
   } catch {
     return null;
@@ -41,8 +44,8 @@ export function readSavedConsent(): Consent | null {
 
 export function consentLabel(value: Consent | null | undefined) {
   if (!value) return "Ainda sem escolha.";
-  if (value.preferences && value.analytics && value.marketing) return "Tudo aceito.";
-  if (!value.preferences && !value.analytics && !value.marketing) return "Só o necessário.";
+  if (value.preferences && value.analytics && value.marketing && value.thirdParty) return "Tudo aceito.";
+  if (!value.preferences && !value.analytics && !value.marketing && !value.thirdParty) return "Só o necessário.";
   return "Escolha personalizada.";
 }
 

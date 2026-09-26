@@ -4,6 +4,7 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { CookieConsent } from "@/components/cookie-consent";
 import { Toaster } from "@/components/ui/toaster";
+import { readSavedConsent } from "@/lib/consent";
 import { getPrefs } from "@/lib/prefs";
 import { applyTheme, readStoredTheme } from "@/lib/theme";
 import appCss from "../styles.css?url";
@@ -27,16 +28,34 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap",
-      },
     ],
   }),
   component: Root,
 });
+
+function ThirdPartyFonts() {
+  useEffect(() => {
+    const id = "third-party-font";
+    const sync = () => {
+      const allow = readSavedConsent()?.thirdParty === true;
+      const current = document.getElementById(id);
+      if (!allow) {
+        current?.remove();
+        return;
+      }
+      if (current) return;
+      const link = document.createElement("link");
+      link.id = id;
+      link.rel = "stylesheet";
+      link.href = "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap";
+      document.head.appendChild(link);
+    };
+    sync();
+    window.addEventListener("cookie-consent", sync);
+    return () => window.removeEventListener("cookie-consent", sync);
+  }, []);
+  return null;
+}
 
 function ThemeSync() {
   useEffect(() => {
@@ -62,6 +81,7 @@ function Root() {
       </head>
       <body>
         <ThemeSync />
+        <ThirdPartyFonts />
         <PreviewHostBridge />
         <AuthProvider>
           <Outlet />
