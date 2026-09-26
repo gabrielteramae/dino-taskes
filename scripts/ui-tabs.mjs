@@ -62,6 +62,10 @@ try {
   if (!href?.includes("calendar.google.com") || (!href.includes("20261002%2F20261005") && !href.includes("20261002/20261005"))) {
     fail(`link da agenda inesperado: ${href}`);
   }
+  const phone = await card.getByRole("link", { name: "Calendário" }).getAttribute("href");
+  if (!phone?.startsWith("/api/agenda?")) fail(`link do calendário inesperado: ${phone}`);
+  const file = await page.request.get(`${base}${phone}`);
+  if (!file.headers()["content-type"]?.includes("text/calendar")) fail("o calendário não devolveu o evento");
   await assertFits("Lista");
 
   await page.getByRole("button", { name: "Calendário" }).click();

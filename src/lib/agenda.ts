@@ -54,6 +54,7 @@ export function icsFor(task: AgendaTask) {
     "VERSION:2.0",
     "PRODID:-//Tarefas//PT",
     "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
     "BEGIN:VEVENT",
     `UID:${task.id}@tarefas`,
     `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`,
@@ -64,19 +65,14 @@ export function icsFor(task: AgendaTask) {
   ].join("\n");
 }
 
-export async function saveOnPhoneCalendar(task: AgendaTask) {
-  const ics = icsFor(task);
-  if (!ics || typeof window === "undefined") return;
-  const file = new File([ics], "tarefa.ics", { type: "text/calendar" });
-  if (navigator.share && navigator.canShare?.({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], title: task.text });
-      return;
-    } catch {
-      return;
-    }
-  }
-  const url = URL.createObjectURL(file);
-  window.location.assign(url);
-  window.setTimeout(() => URL.revokeObjectURL(url), 4000);
+export function phoneCalendarHref(task: AgendaTask) {
+  const start = calendarDay(task.dueAt);
+  const end = calendarDay(task.endsAt) || start;
+  if (!start) return null;
+  const params = new URLSearchParams({ text: task.text, start, end });
+  const startClock = clockOf(task.dueAt);
+  const endClock = clockOf(task.endsAt);
+  if (startClock) params.set("startClock", startClock);
+  if (endClock) params.set("endClock", endClock);
+  return `/api/agenda?${params.toString()}`;
 }

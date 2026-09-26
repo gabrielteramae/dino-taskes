@@ -24,7 +24,7 @@ import { sendUserPush } from "@/lib/push";
 import { AccountMenu } from "@/components/account-menu";
 import { cn } from "@/lib/utils";
 import { calendarDay, clockOf, formatRange, spanDays, withClock } from "@/lib/dates";
-import { googleAgendaUrl, saveOnPhoneCalendar } from "@/lib/agenda";
+import { googleAgendaUrl, phoneCalendarHref } from "@/lib/agenda";
 
 const STOP_WORDS = new Set([
   "para", "com", "uma", "uns", "umas", "que", "das", "dos", "por", "nao", "ate", "dia", "dias",
@@ -575,13 +575,12 @@ function TaskBoard() {
                 >
                   Google Agenda
                 </a>
-                <button
-                  type="button"
-                  onClick={() => saveOnPhoneCalendar(task)}
-                  className="h-11 rounded-lg bg-surface-2 px-2 text-xs text-fg"
+                <a
+                  href={phoneCalendarHref(task) ?? "#"}
+                  className="inline-flex h-11 items-center justify-center rounded-lg bg-surface-2 px-2 text-center text-xs text-fg"
                 >
                   Calendário
-                </button>
+                </a>
               </div>
             ) : null}
           </div>
