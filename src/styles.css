@@ -185,66 +185,31 @@ html[data-theme="dark"] input[type="date"] {
 
 .gradient-mesh {
   position: absolute;
-  inset: -12%;
+  inset: 0;
+  overflow: hidden;
   pointer-events: none;
 }
 
 .mesh-node {
   position: absolute;
-  width: 48%;
-  aspect-ratio: 1;
-  border-radius: 46% 54% 48% 52%;
-  filter: blur(34px);
-  animation: mesh-drift 16s ease-in-out infinite alternate;
+  top: -16px;
+  border-radius: 999px;
+  background: var(--dot, var(--color-accent));
+  opacity: 0;
+  animation: mesh-fall 12s linear infinite;
 }
 
-.mesh-a {
-  top: -6%;
-  left: -8%;
-  background: color-mix(in oklab, var(--color-accent) 80%, white);
-}
-
-.mesh-b {
-  top: 8%;
-  right: -14%;
-  background: #9ed9ae;
-  animation-delay: -5s;
-}
-
-.mesh-c {
-  bottom: -8%;
-  left: 18%;
-  background: #e4b423;
-  opacity: 0.55;
-  animation-delay: -9s;
-}
-
-.mesh-d {
-  top: 38%;
-  left: 28%;
-  width: 34%;
-  background: #1f7a3a;
-  opacity: 0.4;
-  animation-delay: -3s;
-}
-
-.mesh-e {
-  right: 6%;
-  bottom: 16%;
-  width: 28%;
-  background: color-mix(in oklab, var(--color-bg) 40%, white);
-  opacity: 0.7;
-  animation-delay: -7s;
-}
-
-@keyframes mesh-drift {
-  from {
-    transform: translate3d(0, 0, 0) scale(1);
-    border-radius: 46% 54% 48% 52%;
+@keyframes mesh-fall {
+  0% {
+    transform: translate3d(0, -12vh, 0);
+    opacity: 0;
   }
-  to {
-    transform: translate3d(6%, -5%, 0) scale(1.12);
-    border-radius: 58% 42% 52% 48%;
+  12% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(var(--sway, 0px), 112vh, 0);
+    opacity: 0;
   }
 }
 
@@ -254,7 +219,7 @@ html[data-theme="dark"] input[type="date"] {
   left: -20%;
   width: 55%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-accent) 80%, white), transparent);
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
   opacity: 0.65;
   pointer-events: none;
   animation: login-beam 8s linear infinite;

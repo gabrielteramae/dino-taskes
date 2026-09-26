@@ -12,6 +12,24 @@ export const Route = createFileRoute("/login")({ component: Login });
 const GENERIC_AUTH_ERROR = "Não foi possível entrar. Confira os dados e tente de novo.";
 const GOOGLE = GROK_PROVIDERS.find((p) => p.idp === "google");
 
+const FALLING = [
+  { left: "6%", size: 7, delay: "-1s", duration: "11s", sway: "14px", color: "#1f7a3a" },
+  { left: "14%", size: 5, delay: "-6s", duration: "13s", sway: "-10px", color: "#3d9a56" },
+  { left: "22%", size: 9, delay: "-3s", duration: "15s", sway: "8px", color: "#2f9a4a" },
+  { left: "31%", size: 4, delay: "-9s", duration: "10s", sway: "-16px", color: "#4dba62" },
+  { left: "39%", size: 8, delay: "-2s", duration: "14s", sway: "12px", color: "#176b34" },
+  { left: "47%", size: 5, delay: "-7s", duration: "12s", sway: "-8px", color: "#3d9a56" },
+  { left: "55%", size: 10, delay: "-4s", duration: "16s", sway: "18px", color: "#248a42" },
+  { left: "63%", size: 4, delay: "-11s", duration: "11s", sway: "-12px", color: "#4dba62" },
+  { left: "71%", size: 7, delay: "-5s", duration: "13s", sway: "10px", color: "#1f7a3a" },
+  { left: "79%", size: 6, delay: "-8s", duration: "15s", sway: "-14px", color: "#2f9a4a" },
+  { left: "87%", size: 8, delay: "-1.5s", duration: "12s", sway: "6px", color: "#176b34" },
+  { left: "94%", size: 4, delay: "-10s", duration: "14s", sway: "-6px", color: "#3d9a56" },
+  { left: "18%", size: 6, delay: "-12s", duration: "17s", sway: "20px", color: "#248a42" },
+  { left: "58%", size: 5, delay: "-14s", duration: "9s", sway: "-18px", color: "#1f7a3a" },
+  { left: "76%", size: 9, delay: "-13s", duration: "18s", sway: "9px", color: "#4dba62" },
+] as const;
+
 function GoogleMark() {
   return (
     <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
@@ -78,11 +96,21 @@ function Login() {
     <main className="login-glow relative min-h-dvh overflow-hidden bg-bg text-fg">
       <div className="login-grid" aria-hidden="true" />
       <div className="gradient-mesh" aria-hidden="true">
-        <span className="mesh-node mesh-a" />
-        <span className="mesh-node mesh-b" />
-        <span className="mesh-node mesh-c" />
-        <span className="mesh-node mesh-d" />
-        <span className="mesh-node mesh-e" />
+        {FALLING.map((dot) => (
+          <span
+            key={`${dot.left}-${dot.delay}`}
+            className="mesh-node"
+            style={{
+              left: dot.left,
+              width: dot.size,
+              height: dot.size,
+              background: dot.color,
+              animationDelay: dot.delay,
+              animationDuration: dot.duration,
+              ["--sway" as string]: dot.sway,
+            }}
+          />
+        ))}
       </div>
       <div className="login-beam login-beam-a" aria-hidden="true" />
       <div className="login-beam login-beam-b" aria-hidden="true" />
