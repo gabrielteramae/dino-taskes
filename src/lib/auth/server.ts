@@ -192,6 +192,9 @@ export const auth = betterAuth({
   // never merges them into one user — they stay separate identities.
   account: {
     encryptOAuthTokens: true,
+    // Phones drop the extra state cookie on the way back from Google. The state
+    // itself stays in the database and is still checked.
+    skipStateCookieCheck: true,
     accountLinking: {
       enabled: true,
       trustedProviders: [
