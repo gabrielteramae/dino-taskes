@@ -67,7 +67,7 @@ function OAuth() {
   };
 
   return (
-    <AuthScreen title="OAuth">
+    <AuthScreen title="Contas">
       <p className="mb-4 text-sm text-muted">
         Integrar autenticação com OAuth. O app não guarda a senha do Google. Você autoriza lá e volta
         com uma sessão nesta conta.

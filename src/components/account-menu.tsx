@@ -5,7 +5,7 @@ import {
   CircleHelp,
   ChevronRight,
   Database,
-  KeyRound,
+  Link2,
   LogOut,
   Settings,
   Shield,
@@ -19,8 +19,8 @@ const subscribe = () => () => {};
 
 const ITEMS = [
   { to: "/perfil", label: "Perfil", icon: UserRound },
-  { to: "/dados", label: "Banco de dados", icon: Database },
-  { to: "/oauth", label: "OAuth", icon: KeyRound },
+  { to: "/dados", label: "Dados salvos", icon: Database },
+  { to: "/oauth", label: "Contas", icon: Link2 },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
   { to: "/privacidade", label: "Privacidade", icon: Shield },
   { to: "/notificacoes", label: "Notificações", icon: Bell },

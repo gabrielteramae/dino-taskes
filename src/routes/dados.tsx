@@ -43,7 +43,7 @@ function Dados() {
     snap?.engine === "postgres" ? "Postgres" : snap ? "PGLite, nesta máquina" : "…";
 
   return (
-    <AuthScreen title="Banco de dados">
+    <AuthScreen title="Dados salvos">
       <p className="mb-4 text-sm text-muted">
         Explorar persistência com banco de dados. A lista não fica só na tela: cada tarefa é uma linha
         da sua conta. Recarregar a página não apaga.
